@@ -8,10 +8,10 @@
 - **Idea**: A gamified personal expense tracker that makes budgeting fun and engaging.  
 - **Goal**: Help individuals build better financial habits by turning expense tracking into an interactive, motivating experience.  
 - **How:**  
-- Quick expense logging with emoji categories  
-- Animated progress bars for weekly/monthly budgets  
-- Streaks and badges to reward consistency  
-- Visual insights with charts and budget alerts
+  - Quick expense logging with emoji categories  
+  - Animated progress bars for weekly/monthly budgets  
+  - Streaks and badges to reward consistency  
+  - Visual insights with charts and budget alerts
 
 **Core Features:**
 
