@@ -15,9 +15,9 @@
 
 **Core Features:**
 
-Spending tracker - see how much you have spent over a specified period of time (e.g., weekly, monthly, total, etc.)
-Goal setter - setting personal goals for their unique financial situations (e.g., making sure they don’t overspend)
-Streak - keep a track of the number of days in a row the user tracks their expenses to build consistency and discipline.
+- Spending tracker: see how much you have spent over a specified period of time (e.g., weekly, monthly, total, etc.)
+- Goal setter: setting personal goals for their unique financial situations (e.g., making sure they don’t overspend)
+- Streak: keep a track of the number of days in a row the user tracks their expenses to build consistency and discipline.
 
 **Additional Features:**
 
