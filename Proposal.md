@@ -1,0 +1,52 @@
+  
+**Project Name:** Cash Dash  
+**Names:** Aidan Ip, Erik Hashimoto, Kevin Liu, Eric Guan, Daniel Suh, Leo Buckman  
+**Date:** 17/09/25
+
+**Goal \+ Idea:**
+
+- **Idea**: A gamified personal expense tracker that makes budgeting fun and engaging.  
+- **Goal**: Help individuals build better financial habits by turning expense tracking into an interactive, motivating experience.  
+- **How:**  
+- Quick expense logging with emoji categories  
+- Animated progress bars for weekly/monthly budgets  
+- Streaks and badges to reward consistency  
+- Visual insights with charts and budget alerts
+
+**Core Features:**
+
+- Spending tracker  
+- Goal setter  
+- Streak
+
+**Additional Features:**
+
+- Users get XP for certain things they do, such as:  
+  - Daily challenges  
+  - Lucky Spin Wheel  
+  - Mystery Boxes  
+  - Budget Boss Battles  
+  - Achievements for reaching certain milestones  
+- Users have a garden and a zoo area (which they can access through a nav bar at the top)  
+- Users can use XP to “buy” pets or plants for their space, allowing them to build something within the app and create an interactive feel.   
+- Ghost competition where you can compare this month’s spending to your past self
+
+**Technology:**
+
+- Frontend: JavaScript (React)  
+- Backend: Spring  
+- Database/Storage: MongoDB
+
+**Users:**
+
+- College students  
+- People hoping to be financially responsible  
+- Adults hoping to take their financial management to the next level
+
+**Investors:**
+
+- Venture capital and social impact funds (especially those focused on financial wellness)  
+- Fintech VC firms  
+- Angel investors  
+- Corporate investors  
+- Strategic partnerships (banks, credit unions, payment processors)
