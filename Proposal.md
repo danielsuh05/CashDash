@@ -53,6 +53,10 @@
 
 # User Stories:
 
+## Story 1
+Hi, my name is Jared. Jared McCain. I want to use Cash Dash because ever since I got into the NBA, I’ve been spending way too much money without even realizing it. Been spending a lot of money on shoes, clothes and dinners, and it feels like it has all been adding up. With Cash Dash, I can quickly log my expenses after every purchase, keep track of my streaks, and actually see where my money is going. It feels more fun and gamified which makes things less daunting for me. I like that I can set goals so I don’t overspend each month, and the ghost competition lets me see if I’m doing better than “last month Jared.” It makes money management less stressful and actually a little fun.
+
+
 ## Story 4
 My name is Kaden and I like video games. I want to earn XP for completing daily challenges, so that I feel rewarded for maintaining good financial habits. I want there to be daily challenges that are presented in a clear way, and when I complete them, it will reward me with some point system and give me visual feedback. This way I can get small wins every day and then I can check how much money I’ve saved from all of these small wi
 
