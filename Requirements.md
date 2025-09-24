@@ -10,3 +10,4 @@
 8. Easy to navigate interface
 9. Daily challenges for spending (if they beat it, they get XP).
 10. Auditory and visual feedback when you complete a daily challenge.
+11. Visualizations that display the users progress over time
