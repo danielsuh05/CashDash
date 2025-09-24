@@ -28,3 +28,5 @@ Notifications & Reminders
 1. Users must be able to input data and receive a response quickly
 2. The app must be accessible: color contrast, sizing, etc.
 3. The app must render dashboards within 1 second for a typical dataset
+4. All user data (expenses, income, goals) should be fully encrypted
+5. No sensitive financial information (bank passwords, etc.) should be stored directly and instead use manual logging or API integrations
