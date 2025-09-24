@@ -1,6 +1,8 @@
+# Requirements
 
 1. Let user set a spending goal.
 2. Notify user when they are close to reaching their spending goal limit.
+<<<<<<< Updated upstream
 3. Streak tracker
 4. Quick Logging
 
@@ -16,3 +18,9 @@ Erik's Requirements
 2. Connect directly to the users bank account to automatically update income and spending
 3. Send users relavent notifications to increase retention and improve financial management
 4. Easy to navigate interface
+=======
+3. Streak tracker.
+4. Quick Logging.
+5. Daily challenges for spending (if they beat it, they get XP).
+6. Auditory and visual feedback when you complete a daily challenge.
+>>>>>>> Stashed changes
