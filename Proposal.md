@@ -84,6 +84,6 @@ When he tries the gamified personal finance tracker, managing money feels less l
 
 ## Story 7
 
-Aiden is a 30-year-old investment banker. He works long hours and rarely has time to manage his own finances. By the time he gets home, he’s too exhausted to track expenses or update spreadsheets, even though he knows he overspends on takeout and subscriptions.
+My name is Aiden and I’m a 30-year-old investment banker. After working long hours the last thing I want to do is open a spreadsheet or dig through receipts. I’ve tried other finance apps, but they always feel slow and tedious—I never stick with them.
 
-When he tries the gamified personal finance tracker, managing money feels less like a chore and more like a game. Simple challenges, streaks, and rewards motivate him to save, cut unnecessary spending, and hit goals. Over time, he builds healthier financial habits without adding stress to his already demanding schedule.
+With this gamified personal finance tracker, everything is quick. I can track spending, set challenges, and see my progress in seconds. The streaks and rewards make saving feel like a game, not another task on my to-do list. Without wasting time, I’m able to cut back on takeout, trim subscriptions, and actually build better financial habits—something I never managed with other platforms.
