@@ -23,3 +23,6 @@ Notifications & Reminders
 ## Gamification & UX
 
 1. In order to have a more interactive feel, users shall earn XP and level up as they complete challenges, streaks, and goals 
+2. The app shall have a visual feedback system (e.g., animations, confetti, progress rings) when users log actions or complete challenges to reward their efforts
+3. The app shall offer unlockables or fun rewards (e.g., badges, mystery boxes, spin wheel). This could include having a place in the website that stores 
+4. The system shall allow users to view their overall “financial health score” based on habits. This allows them to see the improvement they made and keep advancing . 
