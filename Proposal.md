@@ -53,6 +53,10 @@
 
 # User Stories:
 
+## Story 1
+Hi, my name is Jared. Jared McCain. I want to use Cash Dash because ever since I got into the NBA, I’ve been spending way too much money without even realizing it. Been spending a lot of money on shoes, clothes and dinners, and it feels like it has all been adding up. With Cash Dash, I can quickly log my expenses after every purchase, keep track of my streaks, and actually see where my money is going. It feels more fun and gamified which makes things less daunting for me. I like that I can set goals so I don’t overspend each month, and the ghost competition lets me see if I’m doing better than “last month Jared.” It makes money management less stressful and actually a little fun.
+
+
 ## Story 4
 My name is Kaden and I like video games. I want to earn XP for completing daily challenges, so that I feel rewarded for maintaining good financial habits. I want there to be daily challenges that are presented in a clear way, and when I complete them, it will reward me with some point system and give me visual feedback. This way I can get small wins every day and then I can check how much money I’ve saved from all of these small wi
 
@@ -65,3 +69,10 @@ But Emily is beginning to feel the weight of financial uncertainty. She notices 
 
 Emily doesn’t want to give up her lifestyle, but she does want balance, clarity, and control. She needs a tool that can do what CashDash does!!!!
 
+## Story 6
+John is a third year student in university that decided to study abroad in Madrid for the fall semester. While abroad, he got a notification from his bank that he had spent too much money in the process of booking flights and accommodations for weekend trips. On top of the expensive school tuition, the expenses from living abroad were proving to be too much for his budget. After a few weeks, John realized that he cannot afford to go on any more trips. John came to the conclusion that a leading problem which contributed to his expedited cash burn was his fear of confronting his spending habits. Instead of responsibly checking his account balance, he would avoid looking at his financial statements knowing that he would be disappointed in the results. What John could have benefited from was a system that displayed his financial information in a way that didn't make him feel bad. If John had an app like Cash Dash, he could meet goals he set out for himself, keep budgeting streaks, and ultimately have a better study abroad experience.
+
+## Story 7
+Aiden is a 30-year-old investment banker. He works long hours and rarely has time to manage his own finances. By the time he gets home, he’s too exhausted to track expenses or update spreadsheets, even though he knows he overspends on takeout and subscriptions.
+
+When he tries the gamified personal finance tracker, managing money feels less like a chore and more like a game. Simple challenges, streaks, and rewards motivate him to save, cut unnecessary spending, and hit goals. Over time, he builds healthier financial habits without adding stress to his already demanding schedule.
