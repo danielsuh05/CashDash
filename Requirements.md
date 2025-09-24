@@ -19,3 +19,7 @@ Insights & Visualization
 Notifications & Reminders
 - Send customizable reminders to log expenses.
 - Be able to give motivational quotes that help the user stay more consistent
+
+## Gamification & UX
+
+1. In order to have a more interactive feel, users shall earn XP and level up as they complete challenges, streaks, and goals 
