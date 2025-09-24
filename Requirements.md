@@ -30,11 +30,14 @@
 - In order to have a more interactive feel, users shall earn XP and level up as they complete challenges, streaks, and goals 
 
 ## Non-Functional Requirements
-1. Users must be able to input data and receive a response quickly
-2. The app must be accessible: color contrast, sizing, etc.
-3. The app must render dashboards within 1 second for a typical dataset
+- Users must be able to input data and receive a response quickly
+- The app must be accessible: color contrast, sizing, etc.
+- The app must render dashboards within 1 second for a typical dataset
+- All user data (expenses, income, goals) should be fully encrypted
+- No sensitive financial information (bank passwords, etc.) should be stored directly and instead use manual logging or API integrations
 
 ## Future Features
 - Users can compete against other users. There will be a leaderboard listing who spent the least so that you can compete with others. 
 - Users can share their goals with others so you can see how your friends/family are doing with their goals. 
 - Users can link with their bank for automatic expense importing. This way they don't have to log it right after. 
+
