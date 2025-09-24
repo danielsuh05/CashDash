@@ -9,6 +9,7 @@
 5. Users should be able to specify spending goals within a specified time period (day, week, month, etc.)
 6. The app should be able to compare the current time period to previous performances under the same time period
 7. The app should notify the user when they are close to reaching their specified goal or limit
+
 Insights & Visualization
 - Show expenses in simple, easy-to-read charts (pie, bar, timeline).
 - Call out top spending categories and unusual spikes.
