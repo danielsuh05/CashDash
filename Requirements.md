@@ -10,6 +10,7 @@
 6. The app should be able to compare the current time period to previous performances under the same time period
 7. The app should notify the user when they are close to reaching their specified goal or limit
 
+
 Insights & Visualization
 - Show expenses in simple, easy-to-read charts (pie, bar, timeline).
 - Call out top spending categories and unusual spikes.
@@ -18,3 +19,12 @@ Insights & Visualization
 Notifications & Reminders
 - Send customizable reminders to log expenses.
 - Be able to give motivational quotes that help the user stay more consistent
+
+## Gamification & UX
+
+1. In order to have a more interactive feel, users shall earn XP and level up as they complete challenges, streaks, and goals 
+
+## Non-Functional Requirements
+1. Users must be able to input data and receive a response quickly
+2. The app must be accessible: color contrast, sizing, etc.
+3. The app must render dashboards within 1 second for a typical dataset
