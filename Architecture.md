@@ -19,6 +19,7 @@ Tables:
 - Users (id, email, password hash, username, streak, XP, created_at)
 - Expenses (id, user_id, category, amount, date, notes)
 - Goals (id, user_id, target_amount, period, status)
+- Streaks (id, user_id, days)
 - Achievements (id, user_id, type, earned_at)
 
 ## Authentication & Authorization
