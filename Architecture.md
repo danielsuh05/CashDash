@@ -4,10 +4,10 @@
 
 Model: Client-Server Model (frontend + backend that communicates via REST APIs)
 
-Frontend: React (Vite)
-Styling: Tailwind CSS
-Backend: Express.js + Node.js
-Database: Supabase
+Frontend: React (Vite) <br>
+Styling: Tailwind CSS <br>
+Backend: Express.js + Node.js <br>
+Database: Supabase <br>
 
 ## Devices
 
