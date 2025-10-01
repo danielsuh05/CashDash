@@ -29,3 +29,6 @@ Supabase Auth (JWT Tokens)
 
 If we get to it, we will host on Vercel. 
 
+## Architecture Design
+
+![Architecture Design](./mermaid.png)
