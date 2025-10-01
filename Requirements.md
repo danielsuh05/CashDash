@@ -27,17 +27,7 @@
 
 ## Gamification & UX
 
-- In order to have a more interactive feel, users shall earn XP and level up as they complete challenges, streaks, and goals 
-
-## Non-Functional Requirements
-- Users must be able to input data and receive a response quickly
-- The app must be accessible: color contrast, sizing, etc.
-- The app must render dashboards within 1 second for a typical dataset
-- All user data (expenses, income, goals) should be fully encrypted
-- No sensitive financial information (bank passwords, etc.) should be stored directly and instead use manual logging or API integrations
-
-## Future Features
-- Users can compete against other users. There will be a leaderboard listing who spent the least so that you can compete with others. 
-- Users can share their goals with others so you can see how your friends/family are doing with their goals. 
-- Users can link with their bank for automatic expense importing. This way they don't have to log it right after. 
-
+1. In order to have a more interactive feel, users shall earn XP and level up as they complete challenges, streaks, and goals 
+2. The app shall have a visual feedback system (e.g., animations, confetti, progress rings) when users log actions or complete challenges to reward their efforts
+3. The app shall offer unlockables or fun rewards (e.g., badges, mystery boxes, spin wheel). This could include having a place in the website that stores 
+4. The system shall allow users to view their overall “financial health score” based on habits. This allows them to see the improvement they made and keep advancing . 
