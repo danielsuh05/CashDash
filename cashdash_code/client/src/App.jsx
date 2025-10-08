@@ -2,32 +2,26 @@ import { useState } from 'react'
 import reactLogo from './assets/react.svg'
 import viteLogo from '/vite.svg'
 import './App.css'
+import ExpenseLogger from './components/expense/ExpenseLogger.jsx'
 
 function App() {
   const [count, setCount] = useState(0)
 
   return (
     <>
-      <div>
-        <a href="https://vite.dev" target="_blank">
-          <img src={viteLogo} className="logo" alt="Vite logo" />
-        </a>
-        <a href="https://react.dev" target="_blank">
-          <img src={reactLogo} className="logo react" alt="React logo" />
-        </a>
-      </div>
-      <h1>Vite + React</h1>
-      <div className="card">
-        <button onClick={() => setCount((count) => count + 1)}>
-          count is {count}
-        </button>
-        <p>
-          Edit <code>src/App.jsx</code> and save to test HMR
-        </p>
-      </div>
-      <p className="read-the-docs">
-        Click on the Vite and React logos to learn more
-      </p>
+      <main className="min-h-screen w-full">
+        <div className="max-w-4xl mx-auto p-6 space-y-6">
+          <header className="space-y-1">
+            <h1 className="text-2xl font-semibold">CashDash — Expense Logger</h1>
+            <p className="text-sm text-gray-600">Track expenses and income with simple forms.</p>
+          </header>
+
+          {/* Expense Logger Module */}
+          <section>
+            <ExpenseLogger onChange={(data) => console.log('ExpenseLogger changed', data)} />
+          </section>
+        </div>
+      </main>
     </>
   )
 }
