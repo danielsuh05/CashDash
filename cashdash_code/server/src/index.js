@@ -1,23 +1,14 @@
-import express from "express";
-import { createClient } from "@supabase/supabase-js";
-import dotenv from "dotenv";
+import express from 'express'
+import cors from 'cors'
+import dotenv from 'dotenv'
+import { router as apiRouter } from './routes/api.js'
 
-// Load environment variables from .env.local
-dotenv.config({ path: '.env.local' });
+dotenv.config()
+const app = express()
+app.use(cors())
+app.use(express.json())
 
-const app = express();
-app.use(express.json());
+app.use('/api', apiRouter)
 
-const supabase = createClient(
-  process.env.SUPABASE_URL,
-  process.env.SUPABASE_SERVICE_ROLE_KEY
-);
-
-app.get("/users", async (req, res) => {
-  const { data, error } = await supabase.from("users").select("*");
-  if (error) return res.status(500).json({ error: error.message });
-  console.log("Users table data:", data);
-  res.json(data);
-});
-
-app.listen(4000, () => console.log("Server running on port 4000"));
+const PORT = process.env.PORT || 4000
+app.listen(PORT, () => console.log(`Server running on port ${PORT}`))
