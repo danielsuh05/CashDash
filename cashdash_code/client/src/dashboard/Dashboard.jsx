@@ -1,17 +1,14 @@
 import React from "react";
 import Navbar from "../components/Navbar.jsx";
+import PieChartCustom from "../components/PieChartCustom.jsx";
 import { useAuth } from "../contexts/AuthContext.jsx";
 
 export default function Dashboard() {
   const { user, signOut } = useAuth();
 
-  const handleSignOut = async () => {
-    await signOut();
-  };
-
   return (
     <div className="min-h-screen bg-slate-50">
-      <Navbar user={user} onSignOut={handleSignOut} />
+      <Navbar user={user} onSignOut={signOut} />
 
       <div className="mx-auto w-full max-w-7xl p-4 md:p-6">
         <div className="mb-6">
@@ -26,7 +23,7 @@ export default function Dashboard() {
 
         <div className="mb-6 grid grid-cols-1 gap-6 lg:grid-cols-2">
           <Panel title="Categories">
-            <PieChart />
+            <PieChartCustom />
           </Panel>
           <Panel title="Goals / Budgets">
             <ProgressList />
@@ -100,15 +97,9 @@ export function SummaryCircle() {
   return <Placeholder label="SummaryCircle" />;
 }
 
-export function PieChart() {
-  return <Placeholder label="PieChart" />;
-}
-
 export function HeatMapCalendar() {
   return <Placeholder label="HeatMapCalendar" />;
 }
-
-
 
 export function FloatingActionButton() {
   return (
