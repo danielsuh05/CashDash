@@ -2,6 +2,7 @@ import React from "react";
 import Navbar from "../components/Navbar.jsx";
 import PieChartCustom from "../components/PieChartCustom.jsx";
 import { useAuth } from "../contexts/AuthContext.jsx";
+import CalendarPricing from "../components/Heatmap.jsx";
 
 export default function Dashboard() {
   const { user, signOut } = useAuth();
@@ -31,8 +32,8 @@ export default function Dashboard() {
         </div>
 
         <div className="mb-6">
-          <Panel title="Activity Calendar">
-            <HeatMapCalendar />
+          <Panel title="Activity Calendar" fullHeight>
+            <CalendarPricing />
           </Panel>
         </div>
 
@@ -42,7 +43,7 @@ export default function Dashboard() {
   );
 }
 
-function Panel({ title, children }) {
+function Panel({ title, children, fullHeight = false }) {
   return (
     <section className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm md:p-5">
       {title && (
@@ -50,7 +51,7 @@ function Panel({ title, children }) {
           <h3 className="text-sm font-semibold tracking-wide text-slate-700">{title}</h3>
         </div>
       )}
-      <div className="h-[260px] md:h-[300px]">{children}</div>
+      <div className={fullHeight ? "w-full" : "h-[260px] md:h-[300px]"}>{children}</div>
     </section>
   );
 }
