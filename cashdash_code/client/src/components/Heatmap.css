@@ -111,7 +111,10 @@
 }
 
 .heatmap-tile-price {
-  margin-top: 1.5rem;
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
   width: 100%;
   text-align: center;
   font-size: 0.75rem;
@@ -120,7 +123,6 @@
 
 @media (min-width: 640px) {
   .heatmap-tile-price {
-    margin-top: 2rem;
     font-size: 0.875rem;
   }
 }
