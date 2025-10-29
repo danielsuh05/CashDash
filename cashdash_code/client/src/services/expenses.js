@@ -3,6 +3,7 @@
  *
  * Minimal in-memory CRUD service. Async signatures so we can swap to REST later.
  */
+import { apiCall } from '../utils/api.js'
 
 const store = {
   items: [],
@@ -26,6 +27,11 @@ export async function create(input) {
 
 export async function list() {
   return [...store.items]
+}
+
+// Add this new function to fetch categories from your API
+export async function getExpenseCategories() {
+  return apiCall('/expenses/categories')
 }
 
 export async function update(id, patch) {
