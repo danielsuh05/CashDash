@@ -9,13 +9,10 @@ function fmtUSD(n) {
   return new Intl.NumberFormat("en-US", { style: "currency", currency: "USD", maximumFractionDigits: 0 }).format(n);
 }
 
-// Budget baseline
-const BUDGET = 150;
-
 // Compute tile and price styles
 // Light gray boxes with green/red text based on budget
 
-function getTileStyles(price) {
+function getTileStyles(price, budget) {
   if (price == null) {
     // For days out of month - light gray
     return {
@@ -26,7 +23,7 @@ function getTileStyles(price) {
     };
   }
   
-  const difference = price - BUDGET;
+  const difference = price - budget;
   const isAboveBudget = difference > 0;
   
   // White background for in-month boxes
@@ -43,54 +40,12 @@ function getTileStyles(price) {
   };
 }
 
-// October 2025 prices (wider spectrum around $150 budget)
-
-const priceByDate = {
-  // Week 1 (Oct 1 is Wed)
-  "2025-10-01": 120,  // $30 below budget
-  "2025-10-02": 280,  // $130 above budget
-  "2025-10-03": 95,   // $55 below budget
-  "2025-10-04": 145,  // $5 below budget
-  // Week 2
-  "2025-10-05": 155,  // $5 above budget
-  "2025-10-06": 180,  // $30 above budget
-  "2025-10-07": 220,  // $70 above budget
-  "2025-10-08": 110,  // $40 below budget
-  "2025-10-09": 135,  // $15 below budget
-  "2025-10-10": 300,  // $150 above budget
-  "2025-10-11": 320,  // $170 above budget
-  // Week 3
-  "2025-10-12": 160,  // $10 above budget
-  "2025-10-13": 85,   // $65 below budget
-  "2025-10-14": 240,  // $90 above budget
-  "2025-10-15": 125,  // $25 below budget
-  "2025-10-16": 200,  // $50 above budget
-  "2025-10-17": 140,  // $10 below budget
-  "2025-10-18": 350,  // $200 above budget
-  // Week 4
-  "2025-10-19": 310,  // $160 above budget
-  "2025-10-20": 165,  // $15 above budget
-  "2025-10-21": 105,  // $45 below budget
-  "2025-10-22": 130,  // $20 below budget
-  "2025-10-23": 148,  // $2 below budget
-  "2025-10-24": 270,  // $120 above budget
-  "2025-10-25": 185,  // $35 above budget
-  // Week 5
-  "2025-10-26": 115,  // $35 below budget
-  "2025-10-27": 100,  // $50 below budget
-  "2025-10-28": 195,  // $45 above budget
-  "2025-10-29": 175,  // $25 above budget
-  "2025-10-30": 142,  // $8 below budget
-  "2025-10-31": 90,   // $60 below budget
-};
-
 const WEEKDAY_LABELS = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
 
-// Build a grid for Oct 2025 including leading/trailing days.
-function useOctober2025Grid() {
+// Build a calendar grid for a given month/year
+function useCalendarGrid(year, month) {
   return useMemo(() => {
-    const year = 2025;
-    const month = 9; 
+    // month is 0-indexed (0 = January, 11 = December)
     const firstOfMonth = new Date(Date.UTC(year, month, 1));
     const lastOfMonth = new Date(Date.UTC(year, month + 1, 0));
 
@@ -130,16 +85,96 @@ function useOctober2025Grid() {
     }
 
     return cells;
-  }, []);
+  }, [year, month]);
 }
 
-export default function CalendarPricing() {
-  const cells = useOctober2025Grid();
+/**
+ * CalendarPricing - A heatmap calendar component for displaying daily spending data
+ * 
+ * @param {Object} props
+ * @param {Object} props.data - Object mapping date strings (YYYY-MM-DD) to spending amounts
+ * @param {number} props.budget - Daily budget amount (default: 150)
+ * @param {Date|Object} props.date - Date object or {year, month} for the month to display (default: current month)
+ * @param {Function} props.onPreviousMonth - Callback for previous month navigation
+ * @param {Function} props.onNextMonth - Callback for next month navigation
+ */
+export default function CalendarPricing({ 
+  data = {}, 
+  budget = 150,
+  date = new Date(),
+  onPreviousMonth,
+  onNextMonth
+}) {
+  // Determine year and month from date prop
+  let year, month;
+  if (date instanceof Date) {
+    year = date.getFullYear();
+    month = date.getMonth(); // 0-indexed
+  } else if (date && typeof date === 'object') {
+    year = date.year || new Date().getFullYear();
+    month = (date.month || new Date().getMonth()); // 0-indexed
+  } else {
+    const now = new Date();
+    year = now.getFullYear();
+    month = now.getMonth();
+  }
+
+  const cells = useCalendarGrid(year, month);
+
+  // Format month title
+  const monthTitle = new Date(year, month).toLocaleDateString('en-US', { 
+    month: 'long', 
+    year: 'numeric' 
+  });
 
   return (
     <div className="heatmap-container">
       <header className="heatmap-header">
-        <h1 className="heatmap-title">October 2025</h1>
+        <h1 className="heatmap-title">{monthTitle}</h1>
+        {(onPreviousMonth || onNextMonth) && (
+          <div className="heatmap-navigation">
+            {onPreviousMonth && (
+              <button
+                onClick={onPreviousMonth}
+                className="heatmap-nav-button"
+                aria-label="Previous month"
+              >
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  className="h-4 w-4"
+                >
+                  <path d="m15 18-6-6 6-6" />
+                </svg>
+              </button>
+            )}
+            {onNextMonth && (
+              <button
+                onClick={onNextMonth}
+                className="heatmap-nav-button"
+                aria-label="Next month"
+              >
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  className="h-4 w-4"
+                >
+                  <path d="m9 18 6-6-6-6" />
+                </svg>
+              </button>
+            )}
+          </div>
+        )}
       </header>
 
       {/* Weekday labels */}
@@ -152,13 +187,13 @@ export default function CalendarPricing() {
       {/* Calendar grid */}
       <div className="heatmap-grid">
         {cells.map((cell) => {
-          const price = cell.dateISO ? priceByDate[cell.dateISO] : undefined;
-          const { tileStyle, priceColor } = getTileStyles(cell.outOfMonth ? undefined : price);
+          const price = cell.dateISO ? data[cell.dateISO] : undefined;
+          const { tileStyle, priceColor } = getTileStyles(cell.outOfMonth ? undefined : price, budget);
 
           return (
             <div
               key={cell.key}
-              aria-label={cell.dateISO ? `${cell.dateISO} ${price ? fmtUSD(price) : "no price"}` : `Out of month ${cell.label}`}
+              aria-label={cell.dateISO ? `${cell.dateISO} ${price != null ? fmtUSD(price) : "no price"}` : `Out of month ${cell.label}`}
               className={`heatmap-tile ${cell.outOfMonth ? 'heatmap-tile--out-of-month' : 'heatmap-tile--interactive'}`}
               style={tileStyle}
             >
@@ -168,7 +203,7 @@ export default function CalendarPricing() {
               </div>
 
               {/* Price */}
-              {!cell.outOfMonth && price && (
+              {!cell.outOfMonth && price != null && (
                 <div className="heatmap-tile-price" style={{ color: priceColor }}>
                   {fmtUSD(price)}
                 </div>
