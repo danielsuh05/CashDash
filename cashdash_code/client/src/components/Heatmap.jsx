@@ -9,75 +9,79 @@ function fmtUSD(n) {
   return new Intl.NumberFormat("en-US", { style: "currency", currency: "USD", maximumFractionDigits: 0 }).format(n);
 }
 
-// Compute a background color for a given price using HSL
+// Budget baseline
+const BUDGET = 150;
 
-function priceToTileStyle(price) {
+// Compute tile and price styles
+// Light gray boxes with green/red text based on budget
+
+function getTileStyles(price) {
   if (price == null) {
-    // For days out of month
+    // For days out of month - light gray
     return {
-      backgroundColor: "#F1F2F5",
-      color: "#6B7280" 
+      tileStyle: {
+        backgroundColor: "#F3F4F6",
+      },
+      priceColor: "#6B7280"
     };
   }
-  const min = 160; 
-  const max = 420; 
-  const p = Math.max(min, Math.min(max, price));
-  const t = (p - min) / (max - min); // 0..1
-
- // calculate hue saturation and lightness
-  const hue = 230;
-  const sat = 35 + t * 55; 
-  const light = 90 - t * 55; 
-
-  const bg = `hsl(${hue} ${sat}% ${light}%)`;
-
-  // Choose text color 
-  const textIsLight = light < 55;
+  
+  const difference = price - BUDGET;
+  const isAboveBudget = difference > 0;
+  
+  // White background for in-month boxes
+  const tileStyle = {
+    backgroundColor: "#FFFFFF"
+  };
+  
+  // Green for below budget, red for above budget
+  const priceColor = isAboveBudget ? "#DC2626" : "#16A34A"; // red-600 : green-600
+  
   return {
-    backgroundColor: bg,
-    color: textIsLight ? "#FFFFFF" : "#111827" 
+    tileStyle,
+    priceColor
   };
 }
 
-// October 2025 prices
+// October 2025 prices (wider spectrum around $150 budget)
 
 const priceByDate = {
   // Week 1 (Oct 1 is Wed)
-  "2025-10-01": 180,
-  "2025-10-02": 250,
-  "2025-10-03": 180,
-  "2025-10-04": 180,
+  "2025-10-01": 120,  // $30 below budget
+  "2025-10-02": 280,  // $130 above budget
+  "2025-10-03": 95,   // $55 below budget
+  "2025-10-04": 145,  // $5 below budget
   // Week 2
-  "2025-10-05": 180,
-  "2025-10-06": 180,
-  "2025-10-07": 180,
-  "2025-10-08": 180,
-  "2025-10-09": 180,
-  "2025-10-10": 250,
-  "2025-10-11": 400,
+  "2025-10-05": 155,  // $5 above budget
+  "2025-10-06": 180,  // $30 above budget
+  "2025-10-07": 220,  // $70 above budget
+  "2025-10-08": 110,  // $40 below budget
+  "2025-10-09": 135,  // $15 below budget
+  "2025-10-10": 300,  // $150 above budget
+  "2025-10-11": 320,  // $170 above budget
   // Week 3
-  "2025-10-12": 250,
-  "2025-10-13": 180,
-  "2025-10-14": 250,
-  "2025-10-15": 180,
-  "2025-10-16": 250,
-  "2025-10-17": 180,
-  "2025-10-18": 400,
+  "2025-10-12": 160,  // $10 above budget
+  "2025-10-13": 85,   // $65 below budget
+  "2025-10-14": 240,  // $90 above budget
+  "2025-10-15": 125,  // $25 below budget
+  "2025-10-16": 200,  // $50 above budget
+  "2025-10-17": 140,  // $10 below budget
+  "2025-10-18": 350,  // $200 above budget
   // Week 4
-  "2025-10-19": 400,
-  "2025-10-20": 250,
-  "2025-10-21": 180,
-  "2025-10-22": 180,
-  "2025-10-23": 180,
-  "2025-10-24": 400,
-  "2025-10-25": 400,
+  "2025-10-19": 310,  // $160 above budget
+  "2025-10-20": 165,  // $15 above budget
+  "2025-10-21": 105,  // $45 below budget
+  "2025-10-22": 130,  // $20 below budget
+  "2025-10-23": 148,  // $2 below budget
+  "2025-10-24": 270,  // $120 above budget
+  "2025-10-25": 185,  // $35 above budget
   // Week 5
-  "2025-10-26": 180,
-  "2025-10-27": 180,
-  "2025-10-28": 250,
-  "2025-10-29": 250,
-  "2025-10-30": 180,
-  "2025-10-31": 180,
+  "2025-10-26": 115,  // $35 below budget
+  "2025-10-27": 100,  // $50 below budget
+  "2025-10-28": 195,  // $45 above budget
+  "2025-10-29": 175,  // $25 above budget
+  "2025-10-30": 142,  // $8 below budget
+  "2025-10-31": 90,   // $60 below budget
 };
 
 const WEEKDAY_LABELS = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
@@ -149,14 +153,14 @@ export default function CalendarPricing() {
       <div className="heatmap-grid">
         {cells.map((cell) => {
           const price = cell.dateISO ? priceByDate[cell.dateISO] : undefined;
-          const style = priceToTileStyle(cell.outOfMonth ? undefined : price);
+          const { tileStyle, priceColor } = getTileStyles(cell.outOfMonth ? undefined : price);
 
           return (
             <div
               key={cell.key}
               aria-label={cell.dateISO ? `${cell.dateISO} ${price ? fmtUSD(price) : "no price"}` : `Out of month ${cell.label}`}
               className={`heatmap-tile ${cell.outOfMonth ? 'heatmap-tile--out-of-month' : 'heatmap-tile--interactive'}`}
-              style={style}
+              style={tileStyle}
             >
               {/* Day number */}
               <div className="heatmap-tile-day">
@@ -165,7 +169,7 @@ export default function CalendarPricing() {
 
               {/* Price */}
               {!cell.outOfMonth && price && (
-                <div className="heatmap-tile-price">
+                <div className="heatmap-tile-price" style={{ color: priceColor }}>
                   {fmtUSD(price)}
                 </div>
               )}

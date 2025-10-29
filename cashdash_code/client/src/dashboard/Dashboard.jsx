@@ -32,7 +32,7 @@ export default function Dashboard() {
         </div>
 
         <div className="mb-6">
-          <Panel title="Activity Calendar" fullHeight>
+          <Panel title={null} fullHeight>
             <CalendarPricing />
           </Panel>
         </div>
