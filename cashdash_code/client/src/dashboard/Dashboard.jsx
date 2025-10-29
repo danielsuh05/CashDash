@@ -1,6 +1,7 @@
 import React from "react";
 import Navbar from "../components/Navbar.jsx";
 import PieChartCustom from "../components/PieChartCustom.jsx";
+import ProgressList from "../components/ProgressList.jsx";
 import { useAuth } from "../contexts/AuthContext.jsx";
 import CalendarPricing from "../components/Heatmap.jsx";
 
@@ -141,9 +142,7 @@ export function LineChart() {
   return <Placeholder label="LineChart" />;
 }
 
-export function ProgressList() {
-  return <Placeholder label="ProgressList" />;
-}
+// ProgressList is provided by components/ProgressList.jsx
 
 export function SummaryCircle() {
   return <Placeholder label="SummaryCircle" />;
