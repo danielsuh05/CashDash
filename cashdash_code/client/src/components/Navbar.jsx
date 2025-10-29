@@ -1,17 +1,24 @@
 import React from 'react';
+import { useNavigate, useLocation } from 'react-router-dom';
 
 export default function Navbar({ user, onSignOut }) {
+  const navigate = useNavigate();
+  const location = useLocation();
+
   return (
     <nav className="w-full bg-white border-b border-slate-200 shadow-sm">
       <div className="mx-auto max-w-7xl px-4 md:px-6">
         <div className="flex h-16 items-center justify-between">
           <div className="flex items-center">
-            <div className="flex items-center space-x-2">
+            <button 
+              onClick={() => navigate('/')}
+              className="flex items-center space-x-2 hover:opacity-80 transition"
+            >
               <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-indigo-600 text-white font-bold text-xl">
                 $
               </div>
               <span className="text-xl font-bold text-slate-800">CashDash</span>
-            </div>
+            </button>
           </div>
 
           <div className="flex items-center space-x-4">
@@ -21,14 +28,21 @@ export default function Navbar({ user, onSignOut }) {
               </span>
             )}
 
-            <button className="flex items-center space-x-2 rounded-lg border border-slate-200 bg-slate-50 px-4 py-2 text-sm font-medium text-slate-700 transition hover:bg-slate-100">
+            <button 
+              onClick={() => navigate('/achievements')}
+              className={`flex items-center space-x-2 rounded-lg border px-4 py-2 text-sm font-medium transition ${
+                location.pathname === '/achievements'
+                  ? 'border-indigo-500 bg-indigo-50 text-indigo-700'
+                  : 'border-slate-200 bg-slate-50 text-slate-700 hover:bg-slate-100'
+              }`}
+            >
               <svg
                 xmlns="http://www.w3.org/2000/svg"
                 viewBox="0 0 24 24"
                 fill="none"
                 stroke="currentColor"
                 strokeWidth="2"
-                className="h-5 w-5 text-amber-500"
+                className={`h-5 w-5 ${location.pathname === '/achievements' ? 'text-indigo-600' : 'text-amber-500'}`}
               >
                 <path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6" />
                 <path d="M18 9h1.5a2.5 2.5 0 0 0 0-5H18" />

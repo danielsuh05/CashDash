@@ -1,6 +1,8 @@
+import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
 import { AuthProvider, useAuth } from './contexts/AuthContext.jsx'
 import AuthPage from './components/auth/AuthPage.jsx'
-import Dashboard from './dashboard/Dashboard.jsx'
+import Dashboard from './pages/Dashboard.jsx'
+import Achievements from './pages/Achievements.jsx'
 import './App.css'
 
 function AppContent() {
@@ -18,15 +20,21 @@ function AppContent() {
     return <AuthPage />
   }
 
-  return <>
-    <Dashboard />
-  </>;
+  return (
+    <Routes>
+      <Route path="/" element={<Dashboard />} />
+      <Route path="/achievements" element={<Achievements />} />
+      <Route path="*" element={<Navigate to="/" replace />} />
+    </Routes>
+  );
 }
 
 function App() {
   return (
     <AuthProvider>
-      <AppContent />
+      <BrowserRouter>
+        <AppContent />
+      </BrowserRouter>
     </AuthProvider>
   )
 }

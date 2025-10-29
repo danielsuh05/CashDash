@@ -1,1 +1,43 @@
 @import "tailwindcss";
+
+/* Pixel Zoo Animations */
+.animal-sprite {
+  animation: hop 1.5s ease-in-out infinite;
+}
+
+@keyframes hop {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-4px);
+  }
+}
+
+/* Add subtle bounce animation */
+@keyframes bounce {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-10px);
+  }
+}
+
+/* Popup slide up animation */
+@keyframes slideUpFromButton {
+  0% {
+    opacity: 0;
+    transform: translateY(80px) scale(0.95);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+.popup-slide-up {
+  animation: slideUpFromButton 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
