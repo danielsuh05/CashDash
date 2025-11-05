@@ -1,7 +1,6 @@
 import React from "react";
 
 export function LineChart() {
-  // Sample data: last 7 days of spending
   const data = [
     { day: "Mon", amount: 45 },
     { day: "Tue", amount: 78 },
@@ -15,7 +14,6 @@ export function LineChart() {
   const dailyLimit = 70;
   const maxValue = Math.max(...data.map(d => d.amount), dailyLimit) + 15;
   
-  // Chart dimensions
   const padding = { top: 20, right: 40, bottom: 40, left: 50 };
 
   const getX = (index, width) => {
@@ -46,8 +44,8 @@ export function LineChart() {
           </linearGradient>
         </defs>
 
-        {/* Grid lines */}
         {[0, 25, 50, 75, 100].map((value) => {
+          //Draw the line charts
           const y = getY(value, 300);
           return (
             <g key={value}>
@@ -72,8 +70,8 @@ export function LineChart() {
           );
         })}
 
-        {/* Daily limit line (dotted) */}
         <line
+          // Draw the line chart, daily limit line. Should be dotted
           x1={padding.left}
           y1={getY(dailyLimit, 300)}
           x2={800 - padding.right}
@@ -91,8 +89,9 @@ export function LineChart() {
           ${dailyLimit}
         </text>
 
-        {/* Area fills between the line and the daily limit */}
+        
         {data.map((point, i) => {
+          // Fill the areas between the lines and the dotted daily limit line
           if (i === data.length - 1) return null;
           
           const x1 = getX(i, 800);
@@ -112,13 +111,13 @@ export function LineChart() {
             
             return (
               <g key={`area-${i}`}>
-                {/* First triangle (from start to intersection) */}
                 <path
+                  // First triangle (from start to intersection)
                   d={`M ${x1} ${y1} L ${intersectX} ${limitY} L ${x1} ${limitY} Z`}
                   fill={isAboveLimit1 ? "url(#redFill)" : "url(#greenFill)"}
                 />
-                {/* Second triangle (from intersection to end) */}
                 <path
+                  //Second triangle (from intersection to end)
                   d={`M ${intersectX} ${limitY} L ${x2} ${y2} L ${x2} ${limitY} Z`}
                   fill={isAboveLimit2 ? "url(#redFill)" : "url(#greenFill)"}
                 />
@@ -139,8 +138,8 @@ export function LineChart() {
           );
         })}
 
-        {/* Line path - now with instant color changes */}
         {data.map((point, i) => {
+          //Line path - now with instant color changes
           if (i === data.length - 1) return null;
           
           const x1 = getX(i, 800);
@@ -160,8 +159,8 @@ export function LineChart() {
             
             return (
               <g key={i}>
-                {/* First segment */}
                 <line
+                  // First segment
                   x1={x1}
                   y1={y1}
                   x2={intersectX}
@@ -170,8 +169,8 @@ export function LineChart() {
                   strokeWidth="3"
                   strokeLinecap="round"
                 />
-                {/* Second segment */}
                 <line
+                  // Second segment
                   x1={intersectX}
                   y1={limitY}
                   x2={x2}
@@ -201,8 +200,8 @@ export function LineChart() {
           );
         })}
 
-        {/* Data points */}
         {data.map((point, i) => {
+          //Data points
           const x = getX(i, 800);
           const y = getY(point.amount, 300);
           const isAboveLimit = point.amount > dailyLimit;
@@ -218,14 +217,13 @@ export function LineChart() {
                 stroke="white"
                 strokeWidth="2"
               />
-              {/* Tooltip on hover */}
               <title>${point.amount}</title>
             </g>
           );
         })}
 
-        {/* X-axis labels */}
         {data.map((point, i) => {
+          //Label the x-axis
           const x = getX(i, 800);
           return (
             <text
