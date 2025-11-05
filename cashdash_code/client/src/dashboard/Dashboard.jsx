@@ -4,6 +4,7 @@ import PieChartCustom from "../components/PieChartCustom.jsx";
 import ProgressList from "../components/ProgressList.jsx";
 import { useAuth } from "../contexts/AuthContext.jsx";
 import CalendarPricing from "../components/Heatmap.jsx";
+import { LineChart } from "../components/LineChart.jsx";
 import { FloatingActionButton } from '../components/PlusButtonPopup.jsx'; 
 
 export default function Dashboard() {
@@ -202,10 +203,6 @@ const Placeholder = ({ label }) => (
     <span className="text-sm font-semibold">{`<${label} />`}</span>
   </div>
 );
-
-export function LineChart() {
-  return <Placeholder label="LineChart" />;
-}
 
 // ProgressList is provided by components/ProgressList.jsx
 
