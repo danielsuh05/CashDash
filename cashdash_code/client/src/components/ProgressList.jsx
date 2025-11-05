@@ -27,18 +27,50 @@ export default function ProgressList({
     { name: 'Shopping', spent: 680, budget: 800 },
     { name: 'Utilities', spent: 250, budget: 400 },
   ],
+  isEditMode = false,
+  onUpdateBudget = null,
 }) {
-  const { formatCurrency } = useCurrency()
-  
+  const { formatCurrency } = useCurrency();
+  const [editingIndex, setEditingIndex] = React.useState(null);
+  const [editValue, setEditValue] = React.useState("");
+
+  const handleStartEdit = (index, currentBudget) => {
+    setEditingIndex(index);
+    setEditValue(currentBudget.toString());
+  };
+
+  const handleSaveEdit = (index) => {
+    const newBudget = parseFloat(editValue);
+    if (!isNaN(newBudget) && newBudget > 0 && onUpdateBudget) {
+      onUpdateBudget(index, newBudget);
+    }
+    setEditingIndex(null);
+    setEditValue("");
+  };
+
+  const handleCancelEdit = () => {
+    setEditingIndex(null);
+    setEditValue("");
+  };
+
+  const handleKeyDown = (e, index) => {
+    if (e.key === 'Enter') {
+      handleSaveEdit(index);
+    } else if (e.key === 'Escape') {
+      handleCancelEdit();
+    }
+  };
+
   return (
     <div className="h-full overflow-auto pr-1">
       <ul className="space-y-4">
-        {items.map((item) => {
+        {items.map((item, index) => {
           const p = percent(item.spent, item.budget);
           const clamped = Math.max(0, Math.min(100, p));
           const overBy = Math.max(0, item.spent - item.budget);
           const left = Math.max(0, item.budget - item.spent);
           const isOver = overBy > 0;
+          const isEditing = isEditMode && editingIndex === index;
 
           return (
             <li
@@ -48,9 +80,39 @@ export default function ProgressList({
             >
               <div className="mb-2 flex items-center justify-between">
                 <div className="text-sm font-semibold text-slate-800">{item.name}</div>
-                <div className="text-sm">
+                <div className="text-sm flex items-center gap-2">
                   <span className="font-semibold text-slate-900">{formatCurrency(item.spent)}</span>
-                  <span className="text-slate-400"> / {formatCurrency(item.budget)}</span>
+                  <span className="text-slate-400"> / </span>
+                  {isEditing ? (
+                    <div className="flex items-center gap-1">
+                      <div className="relative">
+                        <span className="absolute left-2 top-1/2 -translate-y-1/2 text-xs text-slate-500">
+                          $
+                        </span>
+                        <input
+                          type="number"
+                          value={editValue}
+                          onChange={(e) => setEditValue(e.target.value)}
+                          onKeyDown={(e) => handleKeyDown(e, index)}
+                          onBlur={() => handleSaveEdit(index)}
+                          autoFocus
+                          step="0.01"
+                          min="0"
+                          className="w-24 rounded border border-indigo-500 bg-white px-2 py-0.5 pl-5 text-xs text-slate-900 focus:outline-none focus:ring-2 focus:ring-indigo-500/20"
+                        />
+                      </div>
+                    </div>
+                  ) : isEditMode ? (
+                    <button
+                      onClick={() => handleStartEdit(index, item.budget)}
+                      className="text-slate-600 hover:text-indigo-600 transition underline decoration-dotted"
+                      title="Click to edit budget"
+                    >
+                      {formatCurrency(item.budget)}
+                    </button>
+                  ) : (
+                    <span className="text-slate-400">{formatCurrency(item.budget)}</span>
+                  )}
                 </div>
               </div>
 
