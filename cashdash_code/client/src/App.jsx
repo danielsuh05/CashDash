@@ -1,6 +1,9 @@
+import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
 import { AuthProvider, useAuth } from './contexts/AuthContext.jsx'
+import { CurrencyProvider } from './contexts/CurrencyContext.jsx'
 import AuthPage from './components/auth/AuthPage.jsx'
 import Dashboard from './dashboard/Dashboard.jsx'
+import AccountPage from './components/AccountPage.jsx'
 import './App.css'
 
 function AppContent() {
@@ -14,19 +17,29 @@ function AppContent() {
     )
   }
 
-  if (!user) {
-    return <AuthPage />
-  }
-
-  return <>
-    <Dashboard />
-  </>;
+  return (
+    <Routes>
+      {!user ? (
+        <Route path="*" element={<AuthPage />} />
+      ) : (
+        <>
+          <Route path="/" element={<Dashboard />} />
+          <Route path="/account" element={<AccountPage />} />
+          <Route path="*" element={<Navigate to="/" replace />} />
+        </>
+      )}
+    </Routes>
+  )
 }
 
 function App() {
   return (
     <AuthProvider>
-      <AppContent />
+      <CurrencyProvider>
+        <BrowserRouter>
+          <AppContent />
+        </BrowserRouter>
+      </CurrencyProvider>
     </AuthProvider>
   )
 }

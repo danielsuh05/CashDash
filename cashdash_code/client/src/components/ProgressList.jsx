@@ -1,13 +1,5 @@
 import React from 'react';
-
-function fmtUSD(n) {
-  if (typeof n !== 'number') return '';
-  return new Intl.NumberFormat('en-US', {
-    style: 'currency',
-    currency: 'USD',
-    maximumFractionDigits: 0,
-  }).format(n);
-}
+import { useCurrency } from '../contexts/CurrencyContext.jsx';
 
 function percent(spent, budget) {
   if (!budget || budget <= 0) return 0;
@@ -36,6 +28,8 @@ export default function ProgressList({
     { name: 'Utilities', spent: 250, budget: 400 },
   ],
 }) {
+  const { formatCurrency } = useCurrency()
+  
   return (
     <div className="h-full overflow-auto pr-1">
       <ul className="space-y-4">
@@ -50,13 +44,13 @@ export default function ProgressList({
             <li
               key={item.name}
               className="rounded-xl border border-slate-200 bg-white p-4 shadow-sm"
-              aria-label={`${item.name} ${fmtUSD(item.spent)} of ${fmtUSD(item.budget)} (${clamped}%)`}
+              aria-label={`${item.name} ${formatCurrency(item.spent)} of ${formatCurrency(item.budget)} (${clamped}%)`}
             >
               <div className="mb-2 flex items-center justify-between">
                 <div className="text-sm font-semibold text-slate-800">{item.name}</div>
                 <div className="text-sm">
-                  <span className="font-semibold text-slate-900">{fmtUSD(item.spent)}</span>
-                  <span className="text-slate-400"> / {fmtUSD(item.budget)}</span>
+                  <span className="font-semibold text-slate-900">{formatCurrency(item.spent)}</span>
+                  <span className="text-slate-400"> / {formatCurrency(item.budget)}</span>
                 </div>
               </div>
 
@@ -78,9 +72,9 @@ export default function ProgressList({
               {/* Footer right: left/over */}
               <div className="flex items-center justify-end">
                 {isOver ? (
-                  <span className="text-xs font-semibold text-red-600">{fmtUSD(overBy)} over</span>
+                  <span className="text-xs font-semibold text-red-600">{formatCurrency(overBy)} over</span>
                 ) : (
-                  <span className="text-xs font-semibold text-green-600">{fmtUSD(left)} left</span>
+                  <span className="text-xs font-semibold text-green-600">{formatCurrency(left)} left</span>
                 )}
               </div>
             </li>

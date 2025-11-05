@@ -1,13 +1,8 @@
 import React, { useMemo } from "react";
+import { useCurrency } from "../contexts/CurrencyContext.jsx";
 import './Heatmap.css';
 
 // Helpers
-
-// Format currency
-function fmtUSD(n) {
-  if (n == null) return "";
-  return new Intl.NumberFormat("en-US", { style: "currency", currency: "USD", maximumFractionDigits: 0 }).format(n);
-}
 
 // Compute tile and price styles
 // Light gray boxes with green/red text based on budget
@@ -105,6 +100,8 @@ export default function CalendarPricing({
   onPreviousMonth,
   onNextMonth
 }) {
+  const { formatCurrency } = useCurrency()
+  
   // Determine year and month from date prop
   let year, month;
   if (date instanceof Date) {
@@ -193,7 +190,7 @@ export default function CalendarPricing({
           return (
             <div
               key={cell.key}
-              aria-label={cell.dateISO ? `${cell.dateISO} ${price != null ? fmtUSD(price) : "no price"}` : `Out of month ${cell.label}`}
+              aria-label={cell.dateISO ? `${cell.dateISO} ${price != null ? formatCurrency(price) : "no price"}` : `Out of month ${cell.label}`}
               className={`heatmap-tile ${cell.outOfMonth ? 'heatmap-tile--out-of-month' : 'heatmap-tile--interactive'}`}
               style={tileStyle}
             >
@@ -205,7 +202,7 @@ export default function CalendarPricing({
               {/* Price */}
               {!cell.outOfMonth && price != null && (
                 <div className="heatmap-tile-price" style={{ color: priceColor }}>
-                  {fmtUSD(price)}
+                  {formatCurrency(price)}
                 </div>
               )}
             </div>

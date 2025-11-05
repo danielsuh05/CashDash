@@ -20,6 +20,45 @@ router.get('/profile', requireAuth, async (req, res) => {
   res.json(data)
 })
 
+// Update profile
+router.patch('/profile', requireAuth, async (req, res) => {
+  const user = req.user
+  const body = req.body || {}
+
+  // Only allow updating specific fields
+  const allowedFields = ['currency']
+  const updatePayload = {}
+  
+  for (const field of allowedFields) {
+    if (body[field] !== undefined) {
+      updatePayload[field] = body[field]
+    }
+  }
+
+  if (Object.keys(updatePayload).length === 0) {
+    return res.status(400).json({ error: 'No valid fields to update' })
+  }
+
+  try {
+    const { data, error } = await supabaseAdmin
+      .from('profiles')
+      .update(updatePayload)
+      .eq('user_id', user.id)
+      .select()
+      .single()
+
+    if (error) {
+      console.error('Database update error:', error)
+      return res.status(400).json({ error: error.message || 'Failed to update profile' })
+    }
+    
+    res.json(data)
+  } catch (err) {
+    console.error('Unexpected error updating profile:', err)
+    res.status(500).json({ error: err.message || 'Internal server error' })
+  }
+})
+
 // Ensure a profile exists for the authenticated user; create with defaults if missing
 router.post('/profiles/ensure', requireAuth, async (req, res) => {
   const user = req.user
