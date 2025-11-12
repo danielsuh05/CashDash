@@ -67,6 +67,8 @@ router.get('/budgets', requireAuth, async (req, res) => {
       }
     })
 
+    budgetData.sort((a, b) => a.name.localeCompare(b.name))
+
     res.json(budgetData)
   } catch (error) {
     console.error('Unexpected error in /budgets:', error)
