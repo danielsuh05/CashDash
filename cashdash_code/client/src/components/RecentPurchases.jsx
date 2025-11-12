@@ -77,14 +77,20 @@ export default function RecentPurchases({ purchases = [] }) {
   // Scroll carousel when index changes
   useEffect(() => {
     if (carouselRef.current) {
-      const firstCard = carouselRef.current.querySelector('.purchase-card')
-      if (firstCard) {
-        const cardWidth = firstCard.offsetWidth
-        const gap = 16 // gap-4 = 16px
-        const scrollPosition = currentIndex * (cardWidth + gap)
-        carouselRef.current.scrollTo({
-          left: scrollPosition,
-          behavior: 'smooth',
+      const cards = carouselRef.current.querySelectorAll('.purchase-card')
+      if (cards.length > 0 && cards[currentIndex]) {
+        const targetCard = cards[currentIndex]
+        // Use offsetLeft to get the card's position relative to the carousel container
+        const scrollPosition = targetCard.offsetLeft
+        
+        // Use requestAnimationFrame to ensure DOM is ready
+        requestAnimationFrame(() => {
+          if (carouselRef.current) {
+            carouselRef.current.scrollTo({
+              left: Math.max(0, scrollPosition),
+              behavior: 'smooth',
+            })
+          }
         })
       }
     }

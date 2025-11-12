@@ -24,12 +24,16 @@
 .recent-purchases-carousel {
   display: flex;
   gap: 16px;
-  overflow-x: hidden;
+  overflow-x: auto; /* Allow scrolling */
+  overflow-y: hidden;
   scroll-behavior: smooth;
   flex: 1;
   scrollbar-width: none; /* Firefox */
   -ms-overflow-style: none; /* IE and Edge */
   min-width: 0; /* Allow flex item to shrink */
+  scroll-padding: 0;
+  /* Ensure container clips content to show exactly 3 cards */
+  position: relative;
 }
 
 .recent-purchases-carousel::-webkit-scrollbar {
@@ -69,8 +73,11 @@
 }
 
 .purchase-card {
-  flex: 0 0 calc((100% - 32px) / 3); /* 3 cards with 16px gap between them */
-  min-width: 240px;
+  /* Calculate width: (carousel width - 2 gaps) / 3 cards */
+  /* Use flex-basis to set the base size, and ensure it doesn't grow or shrink */
+  flex: 0 0 calc((100% - 32px) / 3);
+  width: calc((100% - 32px) / 3);
+  box-sizing: border-box;
   background-color: white;
   border: 1px solid #E2E8F0; /* border-slate-200 */
   border-radius: 12px; 
@@ -79,6 +86,7 @@
   min-height: 380px;
   display: flex;
   flex-direction: column;
+  flex-shrink: 0; /* Prevent cards from shrinking and getting cropped */
 }
 
 .purchase-card-date {
