@@ -95,9 +95,7 @@ export default function Dashboard() {
       <Navbar user={user} onSignOut={signOut} />
 
       <div className="mx-auto w-full max-w-7xl p-4 md:p-6">
-        <div className="mb-6">
-          <GranularityDropdown />
-        </div>
+        
 
         <div className="mb-6">
           <Panel title="Spending Over Time">
@@ -216,29 +214,7 @@ function Panel({ title, children, fullHeight = false, action = null }) {
   );
 }
 
-export function GranularityDropdown() {
-  const [selected, setSelected] = React.useState("Daily");
-  const options = ["Hourly", "Daily", "Weekly", "Monthly", "Yearly"];
 
-  return (
-    <div className="inline-block">
-      <label className="mb-2 block text-sm font-medium text-slate-700">
-        Data Granularity
-      </label>
-      <select
-        value={selected}
-        onChange={(e) => setSelected(e.target.value)}
-        className="rounded-lg border border-slate-300 bg-white px-4 py-2 text-sm font-medium text-slate-700 shadow-sm transition focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 hover:border-slate-400"
-      >
-        {options.map((option) => (
-          <option key={option} value={option}>
-            {option}
-          </option>
-        ))}
-      </select>
-    </div>
-  );
-}
 
 const Placeholder = ({ label }) => (
   <div className="flex h-full w-full items-center justify-center rounded-xl border-2 border-dashed border-slate-300 bg-white text-slate-400">
