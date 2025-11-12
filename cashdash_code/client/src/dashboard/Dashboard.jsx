@@ -5,20 +5,46 @@ import ProgressList from "../components/ProgressList.jsx";
 import { useAuth } from "../contexts/AuthContext.jsx";
 import CalendarPricing from "../components/Heatmap.jsx";
 import { LineChart } from "../components/LineChart.jsx";
-import { FloatingActionButton } from '../components/PlusButtonPopup.jsx'; 
+import { FloatingActionButton } from '../components/PlusButtonPopup.jsx';
+import { getBudgets } from '../services/budgets.js'; 
 
 export default function Dashboard() {
   const { user, signOut } = useAuth();
   const [currentDate, setCurrentDate] = React.useState(new Date(2025, 9, 1)); // October 2025
   const [isEditMode, setIsEditMode] = React.useState(false);
   const [showAddGoalModal, setShowAddGoalModal] = React.useState(false);
-  const [goals, setGoals] = React.useState([
-    { name: 'Food & Dining', spent: 150, budget: 1000 },
-    { name: 'Transportation', spent: 420, budget: 500 },
-    { name: 'Entertainment', spent: 320, budget: 300 },
-    { name: 'Shopping', spent: 680, budget: 800 },
-    { name: 'Utilities', spent: 250, budget: 400 },
-  ]);
+  const [goals, setGoals] = React.useState([]);
+  const [loading, setLoading] = React.useState(true);
+  const [error, setError] = React.useState(null);
+
+  // Fetch budget data on component mount
+  React.useEffect(() => {
+    async function fetchBudgets() {
+      try {
+        setLoading(true);
+        const budgetData = await getBudgets();
+        setGoals(budgetData);
+        setError(null);
+      } catch (err) {
+        console.error('Error fetching budgets:', err);
+        setError(err.message);
+        // Fall back to mock data if API fails
+        setGoals([
+          { name: 'Food & Dining', spent: 150, budget: 1000 },
+          { name: 'Transportation', spent: 420, budget: 500 },
+          { name: 'Entertainment', spent: 320, budget: 300 },
+          { name: 'Shopping', spent: 680, budget: 800 },
+          { name: 'Utilities', spent: 250, budget: 400 },
+        ]);
+      } finally {
+        setLoading(false);
+      }
+    }
+
+    if (user) {
+      fetchBudgets();
+    }
+  }, [user]);
 
   // Sample data - in production, this would come from your backend API
   // Format: { "YYYY-MM-DD": amount }
@@ -95,6 +121,7 @@ export default function Dashboard() {
                       : 'bg-slate-600 text-white hover:bg-slate-700 focus:ring-slate-500'
                   }`}
                   title={isEditMode ? "Done editing" : "Edit budgets"}
+                  disabled={loading}
                 >
                   {isEditMode ? (
                     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="h-4 w-4">
@@ -109,8 +136,9 @@ export default function Dashboard() {
                 </button>
                 <button
                   onClick={() => setShowAddGoalModal(true)}
-                  className="rounded-lg bg-indigo-600 px-3 py-1.5 text-xs font-semibold text-white shadow-sm transition hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                  className="rounded-lg bg-indigo-600 px-3 py-1.5 text-xs font-semibold text-white shadow-sm transition hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 disabled:opacity-50 disabled:cursor-not-allowed"
                   title="Add new goal"
+                  disabled={loading}
                 >
                   <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="h-4 w-4">
                     <line x1="12" y1="5" x2="12" y2="19" />
@@ -120,15 +148,29 @@ export default function Dashboard() {
               </div>
             }
           >
-            <ProgressList 
-              items={goals} 
-              isEditMode={isEditMode}
-              onUpdateBudget={(index, newBudget) => {
-                const updated = [...goals];
-                updated[index].budget = newBudget;
-                setGoals(updated);
-              }} 
-            />
+            {loading ? (
+              <div className="flex h-full items-center justify-center">
+                <div className="animate-spin rounded-full h-8 w-8 border-2 border-indigo-500 border-t-transparent"></div>
+              </div>
+            ) : error ? (
+              <div className="flex h-full items-center justify-center text-red-600">
+                <p className="text-sm">Error loading budgets: {error}</p>
+              </div>
+            ) : goals.length === 0 ? (
+              <div className="flex h-full items-center justify-center text-slate-500">
+                <p className="text-sm">No budgets found. Add a new goal to get started!</p>
+              </div>
+            ) : (
+              <ProgressList 
+                items={goals} 
+                isEditMode={isEditMode}
+                onUpdateBudget={(index, newBudget) => {
+                  const updated = [...goals];
+                  updated[index].budget = newBudget;
+                  setGoals(updated);
+                }} 
+              />
+            )}
           </Panel>
         </div>
 
