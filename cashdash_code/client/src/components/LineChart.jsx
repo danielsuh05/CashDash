@@ -1,18 +1,35 @@
 import React from "react";
 
 export function LineChart() {
+
+  //sample data and budgetLimit for now, will replace with API data later
   const data = [
-    { day: "Mon", amount: 45 },
-    { day: "Tue", amount: 78 },
-    { day: "Wed", amount: 32 },
-    { day: "Thu", amount: 95 },
-    { day: "Fri", amount: 42 },
-    { day: "Sat", amount: 88 },
-    { day: "Sun", amount: 55 },
+    { month: "Jan", amount: 420 },
+    { month: "Feb", amount: 435 },
+    { month: "Mar", amount: 450 },
+    { month: "Apr", amount: 390 },
+    { month: "May", amount: 470 },
+    { month: "Jun", amount: 510 },
+    { month: "Jul", amount: 480 },
+    { month: "Aug", amount: 530 },
+    { month: "Sep", amount: 460 },
+    { month: "Oct", amount: 500 },
+    { month: "Nov", amount: 540 },
+    { month: "Dec", amount: 600 },
   ];
 
-  const dailyLimit = 70;
-  const maxValue = Math.max(...data.map(d => d.amount), dailyLimit) + 15;
+  const budgetLimit = 500;
+
+  //Make budgetLimit is approximately centered to the graph
+  const maxData = Math.max(...data.map(d => d.amount));
+  const minData = Math.min(...data.map(d => d.amount));
+
+  const halfRange = Math.max(Math.abs(maxData - budgetLimit), Math.abs(minData - budgetLimit));
+  const paddingRange = halfRange * 0.15;
+
+  const topValue = budgetLimit + halfRange + paddingRange;
+  let bottomValue = budgetLimit - halfRange - paddingRange;
+  if (bottomValue < 0) bottomValue = 0;
   
   const padding = { top: 20, right: 40, bottom: 40, left: 50 };
 
@@ -23,7 +40,9 @@ export function LineChart() {
 
   const getY = (value, height) => {
     const chartHeight = height - padding.top - padding.bottom;
-    return padding.top + (1 - value / maxValue) * chartHeight;
+    //Map y values from [bottomValue..topValue] to [padding.top .. padding.top+chartHeight]
+    const t = (value - bottomValue) / (topValue - bottomValue);
+    return padding.top + (1 - t) * chartHeight;
   };
 
   return (
@@ -36,7 +55,7 @@ export function LineChart() {
         <defs>
           <linearGradient id="greenFill" x1="0%" y1="100%" x2="0%" y2="50%">
             <stop offset="0%" stopColor="#10b981" stopOpacity="0.4" />
-            <stop offset="100%" stopColor="#10b981" stopOpacity="0.15" />
+            <stop offset="100%" stopColor="#10b981" stopOpacity="0.05" />
           </linearGradient>
           <linearGradient id="redFill" x1="0%" y1="50%" x2="0%" y2="100%">
             <stop offset="0%" stopColor="#ef4444" stopOpacity="0.4" />
@@ -44,68 +63,71 @@ export function LineChart() {
           </linearGradient>
         </defs>
 
-        {[0, 25, 50, 75, 100].map((value) => {
-          //Draw the line charts
-          const y = getY(value, 300);
-          return (
-            <g key={value}>
-              <line
-                x1={padding.left}
-                y1={y}
-                x2={800 - padding.right}
-                y2={y}
-                stroke="#f1f5f9"
-                strokeWidth="1"
-              />
-              <text
-                x={padding.left - 10}
-                y={y + 4}
-                textAnchor="end"
-                className="text-xs fill-slate-400"
-                style={{ fontSize: '11px' }}
-              >
-                ${value}
-              </text>
-            </g>
-          );
-        })}
+        {(() => {
+          //Have 5 horizontal grid lines based on dynamic values from budget
+          const ticks = [0, 0.25, 0.5, 0.75, 1].map((t) => Math.round(bottomValue + t * (topValue - bottomValue)));
+          return ticks.map((value, idx) => {
+            const y = getY(value, 300);
+            return (
+              <g key={idx}>
+                <line
+                  x1={padding.left}
+                  y1={y}
+                  x2={800 - padding.right}
+                  y2={y}
+                  stroke="#f1f5f9"
+                  strokeWidth="1"
+                />
+                <text
+                  x={padding.left - 10}
+                  y={y + 4}
+                  textAnchor="end"
+                  className="text-xs fill-slate-400"
+                  style={{ fontSize: '11px' }}
+                >
+                  {'$' + value}
+                </text>
+              </g>
+            );
+          });
+        })()}
 
         <line
-          // Draw the line chart, daily limit line. Should be dotted
+          //Draw the budget limit line (dotted)
           x1={padding.left}
-          y1={getY(dailyLimit, 300)}
+          y1={getY(budgetLimit, 300)}
           x2={800 - padding.right}
-          y2={getY(dailyLimit, 300)}
+          y2={getY(budgetLimit, 300)}
           stroke="#94a3b8"
           strokeWidth="2"
           strokeDasharray="6,4"
         />
         <text
-          x={800 - padding.right + 5}
-          y={getY(dailyLimit, 300) + 4}
+          x={800 - padding.right + 7}
+          y={getY(budgetLimit, 300) + 4}
           className="text-xs fill-slate-500 font-medium"
           style={{ fontSize: '11px' }}
         >
-          ${dailyLimit}
+          {"Budget Limit: "}${budgetLimit}
         </text>
 
         
         {data.map((point, i) => {
-          // Fill the areas between the lines and the dotted daily limit line
+          // Fill the areas between the lines and the dotted monthly limit line
           if (i === data.length - 1) return null;
           
           const x1 = getX(i, 800);
           const y1 = getY(point.amount, 300);
           const x2 = getX(i + 1, 800);
           const y2 = getY(data[i + 1].amount, 300);
-          const limitY = getY(dailyLimit, 300);
+          const limitY = getY(budgetLimit, 300);
           
-          const isAboveLimit1 = point.amount > dailyLimit;
-          const isAboveLimit2 = data[i + 1].amount > dailyLimit;
+          const isAboveLimit1 = point.amount > budgetLimit;
+          const isAboveLimit2 = data[i + 1].amount > budgetLimit;
           
           // If crossing the limit, split into two triangular areas
           if (isAboveLimit1 !== isAboveLimit2) {
-            // Calculate intersection point with daily limit line
+            // Calculate intersection point with budget limit line
             const slope = (y2 - y1) / (x2 - x1);
             const intersectX = x1 + (limitY - y1) / slope;
             
@@ -147,13 +169,13 @@ export function LineChart() {
           const x2 = getX(i + 1, 800);
           const y2 = getY(data[i + 1].amount, 300);
           
-          const isAboveLimit1 = point.amount > dailyLimit;
-          const isAboveLimit2 = data[i + 1].amount > dailyLimit;
+          const isAboveLimit1 = point.amount > budgetLimit;
+          const isAboveLimit2 = data[i + 1].amount > budgetLimit;
           
           // If crossing the limit, draw two line segments split at intersection
           if (isAboveLimit1 !== isAboveLimit2) {
-            // Calculate intersection point with daily limit line
-            const limitY = getY(dailyLimit, 300);
+            // Calculate intersection point with budget limit line
+            const limitY = getY(budgetLimit, 300);
             const slope = (y2 - y1) / (x2 - x1);
             const intersectX = x1 + (limitY - y1) / slope;
             
@@ -204,7 +226,7 @@ export function LineChart() {
           //Data points
           const x = getX(i, 800);
           const y = getY(point.amount, 300);
-          const isAboveLimit = point.amount > dailyLimit;
+          const isAboveLimit = point.amount > budgetLimit;
           const color = isAboveLimit ? "#ef4444" : "#10b981";
           
           return (
@@ -234,7 +256,7 @@ export function LineChart() {
               className="text-sm fill-slate-600 font-medium"
               style={{ fontSize: '13px' }}
             >
-              {point.day}
+              {point.month}
             </text>
           );
         })}
