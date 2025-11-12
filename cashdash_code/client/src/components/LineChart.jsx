@@ -1,4 +1,5 @@
 import React from "react";
+import { useCurrency } from '../contexts/CurrencyContext.jsx';
 
 export function LineChart() {
 
@@ -20,6 +21,9 @@ export function LineChart() {
 
   const budgetLimit = 500;
 
+  //for currency formatting
+  const { formatCurrency } = useCurrency();
+
   //Make budgetLimit is approximately centered to the graph
   const maxData = Math.max(...data.map(d => d.amount));
   const minData = Math.min(...data.map(d => d.amount));
@@ -31,7 +35,7 @@ export function LineChart() {
   let bottomValue = budgetLimit - halfRange - paddingRange;
   if (bottomValue < 0) bottomValue = 0;
   
-  const padding = { top: 20, right: 40, bottom: 40, left: 50 };
+  const padding = { top: 20, right: -75, bottom: 40, left: -100 };
 
   const getX = (index, width) => {
     const chartWidth = width - padding.left - padding.right;
@@ -54,12 +58,12 @@ export function LineChart() {
       >
         <defs>
           <linearGradient id="greenFill" x1="0%" y1="100%" x2="0%" y2="50%">
-            <stop offset="0%" stopColor="#10b981" stopOpacity="0.4" />
+            <stop offset="0%" stopColor="#10b981" stopOpacity="0.1" />
             <stop offset="100%" stopColor="#10b981" stopOpacity="0.05" />
           </linearGradient>
           <linearGradient id="redFill" x1="0%" y1="50%" x2="0%" y2="100%">
-            <stop offset="0%" stopColor="#ef4444" stopOpacity="0.4" />
-            <stop offset="100%" stopColor="#ef4444" stopOpacity="0.15" />
+            <stop offset="0%" stopColor="#ef4444" stopOpacity="0.1" />
+            <stop offset="100%" stopColor="#ef4444" stopOpacity="0.05" />
           </linearGradient>
         </defs>
 
@@ -85,7 +89,7 @@ export function LineChart() {
                   className="text-xs fill-slate-400"
                   style={{ fontSize: '11px' }}
                 >
-                  {'$' + value}
+                  {formatCurrency(value)}
                 </text>
               </g>
             );
@@ -108,7 +112,7 @@ export function LineChart() {
           className="text-xs fill-slate-500 font-medium"
           style={{ fontSize: '11px' }}
         >
-          {"Budget Limit: "}${budgetLimit}
+          {"Budget Limit"}
         </text>
 
         
