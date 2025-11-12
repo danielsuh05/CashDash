@@ -118,10 +118,24 @@
   flex-shrink: 0;
 }
 
-.purchase-item-name {
+.purchase-item-details {
   flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.purchase-item-name {
   font-size: 16px;
   color: #000;
+  line-height: 1.2;
+}
+
+.purchase-item-category {
+  font-size: 14px;
+  color: #6B7280;
+  font-weight: 400;
+  line-height: 1.2;
 }
 
 .purchase-item-amount {
@@ -129,6 +143,26 @@
   color: #000;
   font-weight: 500;
   text-align: right;
+}
+
+.recent-purchases-loading,
+.recent-purchases-error {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 48px 24px;
+  font-size: 16px;
+  color: #6B7280;
+  background-color: #F9FAFB;
+  border: 1px solid #E5E7EB;
+  border-radius: 12px;
+  margin-top: 16px;
+}
+
+.recent-purchases-error {
+  color: #DC2626;
+  background-color: #FEF2F2;
+  border-color: #FECACA;
 }
 
 /* Responsive adjustments */

@@ -117,3 +117,48 @@ router.get('/expenses/categories', requireAuth, async (req, res) => {
 
   res.json(withPct);
 })
+
+// Get recent expenses (last 7 days) for the current user
+router.get('/expenses/recent', requireAuth, async (req, res) => {
+  const user = req.user
+  
+  // Calculate date 7 days ago
+  const sevenDaysAgo = new Date()
+  sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7)
+  
+  try {
+    const { data, error } = await supabaseAdmin
+      .from('expenses')
+      .select(`
+        id,
+        title,
+        amount_cents,
+        occurred_at,
+        categories(id, name)
+      `)
+      .eq('user_id', user.id)
+      .gte('occurred_at', sevenDaysAgo.toISOString())
+      .order('occurred_at', { ascending: false })
+
+    if (error) {
+      console.error('Database error fetching recent expenses:', error)
+      return res.status(500).json({ error: error.message })
+    }
+
+    // Transform the data to match the expected format for the frontend
+    const transformedData = data.map(expense => ({
+      id: expense.id,
+      name: expense.title,
+      description: expense.title,
+      amount: expense.amount_cents / 100, // Convert cents to dollars
+      date: expense.occurred_at,
+      created_at: expense.occurred_at,
+      category: expense.categories?.name || 'Uncategorized'
+    }))
+
+    res.json(transformedData)
+  } catch (err) {
+    console.error('Error fetching recent expenses:', err)
+    res.status(500).json({ error: 'Internal server error' })
+  }
+})

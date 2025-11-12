@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react'
 import { useCurrency } from '../contexts/CurrencyContext.jsx'
+import { getRecentExpenses } from '../services/expenses.js'
 import './RecentPurchases.css'
 
 // Sample color palette for purchase categories
@@ -21,11 +22,36 @@ const PURCHASE_COLORS = [
 export default function RecentPurchases({ purchases = [] }) {
   const { formatCurrency } = useCurrency()
   const carouselRef = useRef(null)
+  const [recentExpenses, setRecentExpenses] = useState([])
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState(null)
+
+  // Fetch recent expenses on component mount
+  useEffect(() => {
+    async function fetchRecentExpenses() {
+      try {
+        setLoading(true)
+        const expenses = await getRecentExpenses()
+        setRecentExpenses(expenses)
+        setError(null)
+      } catch (err) {
+        console.error('Error fetching recent expenses:', err)
+        setError(err.message)
+      } finally {
+        setLoading(false)
+      }
+    }
+
+    fetchRecentExpenses()
+  }, [])
+
+  // Use recentExpenses if available, fallback to purchases prop, then sample data
+  const dataToUse = recentExpenses.length > 0 ? recentExpenses : purchases
 
   // Group purchases by date
   const purchasesByDate = React.useMemo(() => {
     const grouped = {}
-    purchases.forEach((purchase) => {
+    dataToUse.forEach((purchase) => {
       const date = new Date(purchase.date || purchase.created_at)
       const dateKey = date.toISOString().split('T')[0] // YYYY-MM-DD
       if (!grouped[dateKey]) {
@@ -41,12 +67,12 @@ export default function RecentPurchases({ purchases = [] }) {
       date,
       purchases: grouped[date],
     }))
-  }, [purchases])
+  }, [dataToUse])
 
-  // Generate sample data if no purchases provided
+  // Generate sample data if no purchases provided and not loading
   const displayData = purchasesByDate.length > 0 
     ? purchasesByDate 
-    : generateSampleData()
+    : (!loading ? generateSampleData() : [])
 
   const maxIndex = Math.max(0, displayData.length - 3)
   // Start at the end to show newest dates on the right
@@ -95,6 +121,24 @@ export default function RecentPurchases({ purchases = [] }) {
       }
     }
   }, [currentIndex])
+
+  if (loading) {
+    return (
+      <div className="recent-purchases-container">
+        <h2 className="recent-purchases-title">Recent Purchases</h2>
+        <div className="recent-purchases-loading">Loading recent purchases...</div>
+      </div>
+    )
+  }
+
+  if (error) {
+    return (
+      <div className="recent-purchases-container">
+        <h2 className="recent-purchases-title">Recent Purchases</h2>
+        <div className="recent-purchases-error">Error loading purchases: {error}</div>
+      </div>
+    )
+  }
 
   return (
     <div className="recent-purchases-container">
@@ -172,7 +216,12 @@ function PurchaseDayCard({ date, purchases, formatCurrency }) {
           return (
             <div key={purchase.id || index} className="purchase-item">
               <div className="purchase-item-dot" style={{ backgroundColor: color }} />
-              <span className="purchase-item-name">{purchase.name || purchase.description || 'Purchase'}</span>
+              <div className="purchase-item-details">
+                <span className="purchase-item-name">{purchase.name || purchase.description || 'Purchase'}</span>
+                {purchase.category && (
+                  <span className="purchase-item-category">{purchase.category}</span>
+                )}
+              </div>
               <span className="purchase-item-amount">
                 {formatCurrency(purchase.amount || 0)}
               </span>

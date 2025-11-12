@@ -60,6 +60,11 @@ export async function createExpense(expenseData) {
   })
 }
 
+// Fetch recent expenses (last 7 days)
+export async function getRecentExpenses() {
+  return apiCall('/expenses/recent')
+}
+
 export async function update(id, patch) {
   const idx = store.items.findIndex((x) => x.id === id)
   if (idx === -1) return null
