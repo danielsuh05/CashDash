@@ -29,9 +29,35 @@ export async function list() {
   return [...store.items]
 }
 
-// Add this new function to fetch categories from your API
+// Fetch all available categories
+export async function getCategories() {
+  return apiCall('/categories')
+}
+
+// Fetch expense categories summary (existing function)
 export async function getExpenseCategories() {
   return apiCall('/expenses/categories')
+}
+
+// Create a new expense
+export async function createExpense(expenseData) {
+  const { title, amount, category_id } = expenseData
+  
+  // Convert amount from dollars to cents
+  const amount_cents = Math.round(parseFloat(amount) * 100)
+  
+  return apiCall('/expenses', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({
+      title,
+      amount_cents,
+      // category_id is expected to be a UUID string by the server; do not coerce to number
+      category_id: category_id
+    })
+  })
 }
 
 export async function update(id, patch) {
