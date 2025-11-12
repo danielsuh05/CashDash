@@ -20,7 +20,6 @@ const PURCHASE_COLORS = [
  */
 export default function RecentPurchases({ purchases = [] }) {
   const { formatCurrency } = useCurrency()
-  const [currentIndex, setCurrentIndex] = useState(0)
   const carouselRef = useRef(null)
 
   // Group purchases by date
@@ -35,8 +34,8 @@ export default function RecentPurchases({ purchases = [] }) {
       grouped[dateKey].push(purchase)
     })
     
-    // Sort dates in descending order (most recent first)
-    const sortedDates = Object.keys(grouped).sort((a, b) => new Date(b) - new Date(a))
+    // Sort dates in ascending order (oldest first, newest last - newest appears on right)
+    const sortedDates = Object.keys(grouped).sort((a, b) => new Date(a) - new Date(b))
     
     return sortedDates.map((date) => ({
       date,
@@ -50,6 +49,16 @@ export default function RecentPurchases({ purchases = [] }) {
     : generateSampleData()
 
   const maxIndex = Math.max(0, displayData.length - 3)
+  // Start at the end to show newest dates on the right
+  const [currentIndex, setCurrentIndex] = useState(0)
+  
+  // Initialize to show newest dates on the right when data loads
+  useEffect(() => {
+    if (displayData.length > 0) {
+      setCurrentIndex(Math.max(0, maxIndex))
+    }
+  }, [displayData.length, maxIndex])
+  
   const canScrollLeft = currentIndex > 0
   const canScrollRight = currentIndex < maxIndex
 
@@ -174,7 +183,8 @@ function generateSampleData() {
   const today = new Date()
   const dates = []
   
-  for (let i = 0; i < 7; i++) {
+  // Generate dates from oldest to newest (oldest first, newest last)
+  for (let i = 6; i >= 0; i--) {
     const date = new Date(today)
     date.setDate(date.getDate() - i)
     dates.push({
