@@ -103,20 +103,20 @@
 }
 
 .purchase-item-dot {
-  width: 8px;
-  height: 8px;
+  width: 14px;
+  height: 14px;
   border-radius: 50%;
   flex-shrink: 0;
 }
 
 .purchase-item-name {
   flex: 1;
-  font-size: 14px;
+  font-size: 16px;
   color: #000;
 }
 
 .purchase-item-amount {
-  font-size: 14px;
+  font-size: 16px;
   color: #000;
   font-weight: 500;
   text-align: right;
