@@ -1,8 +1,78 @@
 import express from 'express'
 import { requireAuth } from '../middleware/requireAuth.js'
 import { supabaseAdmin } from '../utils/supabaseAdmin.js'
+import { startOfMonth, endOfMonth } from '../utils/getDates.js';
 
 export const router = express.Router()
+
+// Get all available categories
+router.get('/categories', requireAuth, async (req, res) => {
+  try {
+    const { data, error } = await supabaseAdmin
+      .from('categories')
+      .select('id, name')
+      .order('name')
+
+    if (error) {
+      return res.status(500).json({ error: error.message })
+    }
+
+    res.json(data)
+  } catch (err) {
+    console.error('Error fetching categories:', err)
+    res.status(500).json({ error: 'Internal server error' })
+  }
+})
+
+// Create a new expense
+router.post('/expenses', requireAuth, async (req, res) => {
+  const user = req.user
+  const { title, amount_cents, category_id } = req.body
+
+  // Validate required fields
+  if (!title || amount_cents === undefined || !category_id) {
+    return res.status(400).json({ 
+      error: 'Missing required fields: title, amount_cents, and category_id are required' 
+    })
+  }
+
+  // Validate amount_cents is a positive integer
+  if (typeof amount_cents !== 'number' || amount_cents <= 0 || !Number.isInteger(amount_cents)) {
+    return res.status(400).json({ 
+      error: 'amount_cents must be a positive integer representing cents' 
+    })
+  }
+
+  try {
+    const { data, error } = await supabaseAdmin
+      .from('expenses')
+      .insert({
+        user_id: user.id,
+        title: title.trim(),
+        amount_cents,
+        category_id,
+        occurred_at: new Date().toISOString()
+      })
+      .select(`
+        id,
+        title,
+        amount_cents,
+        occurred_at,
+        categories(id, name)
+      `)
+      .single()
+
+    if (error) {
+      console.error('Database error creating expense:', error)
+      return res.status(400).json({ error: error.message })
+    }
+
+    res.status(201).json(data)
+  } catch (err) {
+    console.error('Error creating expense:', err)
+    res.status(500).json({ error: 'Internal server error' })
+  }
+})
 
 // Get all expenses for a user
 router.get('/expenses/categories', requireAuth, async (req, res) => {
@@ -17,6 +87,8 @@ router.get('/expenses/categories', requireAuth, async (req, res) => {
     `)
     .eq('user_id', user.id)
     .gt('amount_cents', 0)
+    .gte('occurred_at', startOfMonth)
+    .lte('occurred_at', endOfMonth)
     .order('amount_cents', { ascending: false })
 
   if (error) {
