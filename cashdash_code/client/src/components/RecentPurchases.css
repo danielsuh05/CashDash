@@ -39,9 +39,10 @@
 .recent-purchases-arrow {
   width: 40px;
   height: 40px;
-  border-radius: 50%;
-  background-color: #E5E7EB;
-  border: none;
+  border-radius: 50%; /* circular */
+  background-color: white;
+  border: 1px solid #E2E8F0; /* border-slate-200 to match cards */
+  box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05); /* shadow-sm to match cards */
   display: flex;
   align-items: center;
   justify-content: center;
@@ -52,17 +53,19 @@
 }
 
 .recent-purchases-arrow:hover:not(.disabled) {
-  background-color: #D1D5DB;
-  transform: scale(1.05);
+  background-color: #F8FAFC; /* slight hover effect */
+  border-color: #CBD5E1; /* slightly darker border on hover */
+  transform: scale(1.02);
 }
 
 .recent-purchases-arrow:active:not(.disabled) {
-  transform: scale(0.95);
+  transform: scale(0.98);
 }
 
 .recent-purchases-arrow.disabled {
   opacity: 0.4;
   cursor: not-allowed;
+  background-color: #F8FAFC;
 }
 
 .purchase-card {
@@ -128,6 +131,7 @@
   .recent-purchases-arrow {
     width: 36px;
     height: 36px;
+    border-radius: 50%; /* circular */
   }
 }
 
