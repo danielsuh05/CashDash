@@ -3,14 +3,13 @@ import Navbar from "../components/Navbar.jsx";
 import PieChartCustom from "../components/PieChartCustom.jsx";
 import ProgressList from "../components/ProgressList.jsx";
 import { useAuth } from "../contexts/AuthContext.jsx";
-import CalendarPricing from "../components/Heatmap.jsx";
+import RecentPurchases from "../components/RecentPurchases.jsx";
 import { LineChart } from "../components/LineChart.jsx";
 import { FloatingActionButton } from '../components/PlusButtonPopup.jsx';
 import { getBudgets } from '../services/budgets.js'; 
 
 export default function Dashboard() {
   const { user, signOut } = useAuth();
-  const [currentDate, setCurrentDate] = React.useState(new Date(2025, 9, 1)); // October 2025
   const [isEditMode, setIsEditMode] = React.useState(false);
   const [showAddGoalModal, setShowAddGoalModal] = React.useState(false);
   const [goals, setGoals] = React.useState([]);
@@ -45,50 +44,6 @@ export default function Dashboard() {
       fetchBudgets();
     }
   }, [user]);
-
-  // Sample data - in production, this would come from your backend API
-  // Format: { "YYYY-MM-DD": amount }
-  const sampleData = {
-    "2025-10-01": 120,
-    "2025-10-02": 280,
-    "2025-10-03": 95,
-    "2025-10-04": 145,
-    "2025-10-05": 155,
-    "2025-10-06": 180,
-    "2025-10-07": 220,
-    "2025-10-08": 110,
-    "2025-10-09": 135,
-    "2025-10-10": 300,
-    "2025-10-11": 320,
-    "2025-10-12": 160,
-    "2025-10-13": 85,
-    "2025-10-14": 240,
-    "2025-10-15": 125,
-    "2025-10-16": 200,
-    "2025-10-17": 140,
-    "2025-10-18": 350,
-    "2025-10-19": 310,
-    "2025-10-20": 165,
-    "2025-10-21": 105,
-    "2025-10-22": 130,
-    "2025-10-23": 148,
-    "2025-10-24": 270,
-    "2025-10-25": 185,
-    "2025-10-26": 115,
-    "2025-10-27": 100,
-    "2025-10-28": 195,
-    "2025-10-29": 175,
-    "2025-10-30": 142,
-    "2025-10-31": 90,
-  };
-
-  const handlePreviousMonth = () => {
-    setCurrentDate(new Date(currentDate.getFullYear(), currentDate.getMonth() - 1, 1));
-  };
-
-  const handleNextMonth = () => {
-    setCurrentDate(new Date(currentDate.getFullYear(), currentDate.getMonth() + 1, 1));
-  };
 
   return (
     <div className="min-h-screen bg-slate-50">
@@ -184,13 +139,7 @@ export default function Dashboard() {
 
         <div className="mb-6">
           <Panel title={null} fullHeight>
-            <CalendarPricing 
-              data={sampleData}
-              budget={150}
-              date={currentDate}
-              onPreviousMonth={handlePreviousMonth}
-              onNextMonth={handleNextMonth}
-            />
+            <RecentPurchases purchases={[]} />
           </Panel>
         </div>
 
