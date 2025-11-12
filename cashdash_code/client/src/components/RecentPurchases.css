@@ -1,0 +1,133 @@
+/* Recent Purchases Component Styles */
+
+.recent-purchases-container {
+  width: 100%;
+  padding: 24px;
+}
+
+.recent-purchases-title {
+  font-size: 24px;
+  font-weight: bold;
+  color: #000;
+  margin-bottom: 24px;
+  text-align: left;
+}
+
+.recent-purchases-carousel-wrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  width: 100%;
+}
+
+.recent-purchases-carousel {
+  display: flex;
+  gap: 16px;
+  overflow-x: hidden;
+  scroll-behavior: smooth;
+  flex: 1;
+  scrollbar-width: none; /* Firefox */
+  -ms-overflow-style: none; /* IE and Edge */
+  min-width: 0; /* Allow flex item to shrink */
+}
+
+.recent-purchases-carousel::-webkit-scrollbar {
+  display: none; /* Chrome, Safari, Opera */
+}
+
+.recent-purchases-arrow {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background-color: #E5E7EB;
+  border: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  color: #374151;
+  transition: all 0.2s ease;
+  flex-shrink: 0;
+}
+
+.recent-purchases-arrow:hover:not(.disabled) {
+  background-color: #D1D5DB;
+  transform: scale(1.05);
+}
+
+.recent-purchases-arrow:active:not(.disabled) {
+  transform: scale(0.95);
+}
+
+.recent-purchases-arrow.disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.purchase-card {
+  flex: 0 0 calc((100% - 32px) / 3); /* 3 cards with 16px gap between them */
+  min-width: 240px;
+  background-color: white;
+  border: 1px solid #E2E8F0; /* border-slate-200 */
+  border-radius: 12px; /* rounded-xl */
+  padding: 16px; /* p-4 */
+  box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05); /* shadow-sm */
+  min-height: 280px;
+  display: flex;
+  flex-direction: column;
+}
+
+.purchase-card-date {
+  font-size: 16px;
+  font-weight: bold;
+  color: #000;
+  margin-bottom: 16px;
+}
+
+.purchase-card-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  flex: 1;
+  margin-bottom: 24px; /* Extra white space at the bottom */
+}
+
+.purchase-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.purchase-item-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.purchase-item-name {
+  flex: 1;
+  font-size: 14px;
+  color: #000;
+}
+
+.purchase-item-amount {
+  font-size: 14px;
+  color: #000;
+  font-weight: 500;
+  text-align: right;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .purchase-card {
+    min-width: 240px;
+  }
+  
+  .recent-purchases-arrow {
+    width: 36px;
+    height: 36px;
+  }
+}
+
