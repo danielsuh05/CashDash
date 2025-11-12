@@ -21,16 +21,33 @@ function percent(spent, budget) {
   return Math.round((spent / budget) * 100);
 }
 
-function progressToColor(p) {
-  const clamped = Math.max(0, Math.min(100, p));
-  const hue = 120 - (120 * clamped) / 100; // 120 (green) -> 0 (red)
-  // Lightness: increase from 30% to 60% up to ~70%, then slightly darker to 50% at 100%
-  const lightness = clamped < 70
-    ? 30 + (30 * clamped) / 70
-    : 60 - (10 * (clamped - 70)) / 30;
-  const saturation = 80; // vivid color
-  return `hsl(${Math.round(hue)}, ${saturation}%, ${Math.round(lightness)}%)`;
+// Get color for category - using a simple color scheme
+function getCategoryColor(categoryName, index) {
+  const categoryLower = categoryName.toLowerCase();
+  
+  // Check for food-related categories
+  if (categoryLower.includes('food') || categoryLower.includes('dining') || categoryLower.includes('restaurant') || categoryLower.includes('grocery')) {
+    return '#16A34A'; // green-600
+  }
+  
+  // Check for entertainment-related categories
+  if (categoryLower.includes('entertainment') || categoryLower.includes('movie') || categoryLower.includes('game')) {
+    return '#2563EB'; // blue-600
+  }
+  
+  // Default color scheme based on index
+  const colors = [
+    '#16A34A', // green
+    '#2563EB', // blue
+    '#9333EA', // purple
+    '#EA580C', // orange
+    '#DC2626', // red
+    '#CA8A04', // yellow
+  ];
+  
+  return colors[index % colors.length];
 }
+
 
 //ProgressList - Budget progress list matching the provided mock
 
@@ -163,86 +180,78 @@ export default function ProgressList() {
             <p className="text-sm">No budgets found. Add a new goal to get started!</p>
           </div>
         ) : (
-          <ul className="space-y-4">
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
             {items.map((item, index) => {
           const p = percent(item.spent, item.budget);
           const clamped = Math.max(0, Math.min(100, p));
-          const overBy = Math.max(0, item.spent - item.budget);
-          const left = Math.max(0, item.budget - item.spent);
-          const isOver = overBy > 0;
           const isEditing = isEditMode && editingIndex === index;
+          const categoryColor = getCategoryColor(item.name, index);
 
           return (
-            <li
+            <div
               key={item.name}
-              className="rounded-xl border border-slate-200 bg-white p-4 shadow-sm"
+              className="flex flex-col"
               aria-label={`${item.name} ${formatCurrency(item.spent)} of ${formatCurrency(item.budget)} (${clamped}%)`}
             >
-              <div className="mb-2 flex items-center justify-between">
-                <div className="text-sm font-semibold text-slate-800">{item.name}</div>
-                <div className="text-sm flex items-center gap-2">
-                  <span className="font-semibold text-slate-900">{formatCurrency(item.spent)}</span>
-                  <span className="text-slate-400"> / </span>
-                  {isEditing ? (
-                    <div className="flex items-center gap-1">
-                      <div className="relative">
-                        <span className="absolute left-2 top-1/2 -translate-y-1/2 text-xs text-slate-500">
-                          $
-                        </span>
-                        <input
-                          type="number"
-                          value={editValue}
-                          onChange={(e) => setEditValue(e.target.value)}
-                          onKeyDown={(e) => handleKeyDown(e, index)}
-                          onBlur={() => handleSaveEdit(index)}
-                          autoFocus
-                          step="0.01"
-                          min="0"
-                          className="w-24 rounded border border-indigo-500 bg-white px-2 py-0.5 pl-5 text-xs text-slate-900 focus:outline-none focus:ring-2 focus:ring-indigo-500/20"
-                        />
-                      </div>
+              {/* Category Header */}
+              <div className="mb-2">
+                <div className="text-base font-semibold text-black">{item.name}</div>
+              </div>
+
+              {/* Spending Details */}
+              <div className="mb-4 flex items-baseline gap-1">
+                <span 
+                  className="text-4xl font-semibold"
+                  style={{ color: categoryColor }}
+                >
+                  {formatCurrency(item.spent)}
+                </span>
+                <span className="text-4xl text-slate-400">/ {formatCurrency(item.budget)}</span>
+                {isEditing && (
+                  <div className="ml-2 flex items-center gap-1">
+                    <div className="relative">
+                      <span className="absolute left-2 top-1/2 -translate-y-1/2 text-xs text-slate-500">
+                        $
+                      </span>
+                      <input
+                        type="number"
+                        value={editValue}
+                        onChange={(e) => setEditValue(e.target.value)}
+                        onKeyDown={(e) => handleKeyDown(e, index)}
+                        onBlur={() => handleSaveEdit(index)}
+                        autoFocus
+                        step="0.01"
+                        min="0"
+                        className="w-20 rounded border border-indigo-500 bg-white px-2 py-0.5 pl-5 text-xs text-slate-900 focus:outline-none focus:ring-2 focus:ring-indigo-500/20"
+                      />
                     </div>
-                  ) : isEditMode ? (
-                    <button
-                      onClick={() => handleStartEdit(index, item.budget)}
-                      className="text-slate-600 hover:text-indigo-600 transition underline decoration-dotted"
-                      title="Click to edit budget"
-                    >
-                      {formatCurrency(item.budget)}
-                    </button>
-                  ) : (
-                    <span className="text-slate-400">{formatCurrency(item.budget)}</span>
-                  )}
-                </div>
+                  </div>
+                )}
+                {!isEditing && isEditMode && (
+                  <button
+                    onClick={() => handleStartEdit(index, item.budget)}
+                    className="ml-2 text-xs text-slate-600 hover:text-indigo-600 transition underline decoration-dotted"
+                    title="Click to edit budget"
+                  >
+                    Edit
+                  </button>
+                )}
               </div>
 
               {/* Progress bar */}
-              <div className="relative mb-2 h-4 w-full overflow-hidden rounded-full bg-slate-200 md:h-5">
+              <div className="relative h-10 w-full overflow-hidden rounded-full bg-slate-200">
                 <div
-                  className={`h-full transition-all`}
+                  className="h-full transition-all"
                   style={{
                     width: `${Math.min(100, clamped)}%`,
-                    backgroundColor: isOver ? '#EF4444' : progressToColor(clamped),
+                    backgroundColor: categoryColor,
                   }}
                 />
-                {/* Centered percentage text */}
-                <div className="pointer-events-none absolute inset-0 flex items-center justify-center">
-                  <span className="text-[11px] font-semibold text-white drop-shadow-sm">{clamped}%</span>
-                </div>
               </div>
-
-              {/* Footer right: left/over */}
-              <div className="flex items-center justify-end">
-                {isOver ? (
-                  <span className="text-xs font-semibold text-red-600">{formatCurrency(overBy)} over</span>
-                ) : (
-                  <span className="text-xs font-semibold text-green-600">{formatCurrency(left)} left</span>
-                )}
-              </div>
-            </li>
+            </div>
           );
         })}
-      </ul>
+      </div>
         )}
         </div>
       )}
