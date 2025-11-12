@@ -2,10 +2,12 @@ import express from 'express'
 import { requireAuth } from '../middleware/requireAuth.js'
 import { supabaseAdmin } from '../utils/supabaseAdmin.js'
 import { router as expensesRouter } from './expenses.js'
+import { router as budgetsRouter } from './budgets.js'
 
 export const router = express.Router()
 
 router.use(expensesRouter)
+router.use(budgetsRouter)
 
 router.get('/profile', requireAuth, async (req, res) => {
   const user = req.user
