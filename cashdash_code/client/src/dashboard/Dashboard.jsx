@@ -5,7 +5,7 @@ import ProgressList from "../components/ProgressList.jsx";
 import { useAuth } from "../contexts/AuthContext.jsx";
 import CalendarPricing from "../components/Heatmap.jsx";
 import { LineChart } from "../components/LineChart.jsx";
-import { FloatingActionButton } from '../components/PlusButtonPopup.jsx';
+import { FloatingActionButton } from '../components/AddExpenseButton.jsx';
 import { getBudgets } from '../services/budgets.js'; 
 
 export default function Dashboard() {

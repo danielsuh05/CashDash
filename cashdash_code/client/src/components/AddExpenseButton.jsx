@@ -1,22 +1,61 @@
 
 import React from 'react';
+import { getCategories, createExpense } from '../services/expenses.js';
+
 export function FloatingActionButton() {
     const [isOpen, setIsOpen] = React.useState(false);
     const [expenseName, setExpenseName] = React.useState("");
     const [amount, setAmount] = React.useState("");
-    const [category, setCategory] = React.useState("Food");
+    const [category, setCategory] = React.useState("");
+    const [categories, setCategories] = React.useState([]);
+    const [isLoading, setIsLoading] = React.useState(false);
+    const [error, setError] = React.useState("");
+
+    // Load categories when component mounts
+    React.useEffect(() => {
+        loadCategories();
+    }, []);
+
+    const loadCategories = async () => {
+        try {
+            const categoriesData = await getCategories();
+            setCategories(categoriesData);
+            if (categoriesData.length > 0) {
+                setCategory(categoriesData[0].id.toString());
+            }
+        } catch (err) {
+            console.error('Failed to load categories:', err);
+            setError('Failed to load categories');
+        }
+    };
   
-    const categories = ["Food", "Transportation", "Shopping", "Entertainment", "Bills", "Healthcare", "Other"];
-  
-    const handleSubmit = (e) => {
+    const handleSubmit = async (e) => {
       e.preventDefault();
-      // Handle form submission here
-      console.log({ expenseName, amount, category });
-      // Reset form
-      setExpenseName("");
-      setAmount("");
-      setCategory("Food");
-      setIsOpen(false);
+      setIsLoading(true);
+      setError("");
+
+      try {
+        await createExpense({
+          title: expenseName,
+          amount: amount,
+          category_id: category
+        });
+        
+        // Reset form on success
+        setExpenseName("");
+        setAmount("");
+        setCategory(categories.length > 0 ? categories[0].id.toString() : "");
+        setIsOpen(false);
+        
+        // You might want to trigger a refresh of the dashboard here
+        // window.location.reload(); // or use a callback prop
+        
+      } catch (err) {
+        console.error('Failed to create expense:', err);
+        setError(err.message || 'Failed to add expense');
+      } finally {
+        setIsLoading(false);
+      }
     };
   
     return (
@@ -47,6 +86,12 @@ export function FloatingActionButton() {
             </div>
   
             <form onSubmit={handleSubmit} className="space-y-4">
+              {error && (
+                <div className="rounded-lg bg-red-50 p-3 text-sm text-red-600">
+                  {error}
+                </div>
+              )}
+              
               {/* Expense Name */}
               <div>
                 <label className="mb-1 block text-sm font-medium text-slate-700">
@@ -58,7 +103,8 @@ export function FloatingActionButton() {
                   onChange={(e) => setExpenseName(e.target.value)}
                   placeholder="e.g., Lunch at cafe"
                   required
-                  className="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 placeholder-slate-400 transition focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/20"
+                  disabled={isLoading}
+                  className="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 placeholder-slate-400 transition focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 disabled:opacity-50"
                 />
               </div>
   
@@ -79,7 +125,8 @@ export function FloatingActionButton() {
                     step="0.01"
                     min="0"
                     required
-                    className="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 pl-7 text-sm text-slate-900 placeholder-slate-400 transition focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/20"
+                    disabled={isLoading}
+                    className="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 pl-7 text-sm text-slate-900 placeholder-slate-400 transition focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 disabled:opacity-50"
                   />
                 </div>
               </div>
@@ -92,22 +139,29 @@ export function FloatingActionButton() {
                 <select
                   value={category}
                   onChange={(e) => setCategory(e.target.value)}
-                  className="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 transition focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/20"
+                  required
+                  disabled={isLoading}
+                  className="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 transition focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 disabled:opacity-50"
                 >
-                  {categories.map((cat) => (
-                    <option key={cat} value={cat}>
-                      {cat}
-                    </option>
-                  ))}
+                  {categories.length === 0 ? (
+                    <option value="">Loading categories...</option>
+                  ) : (
+                    categories.map((cat) => (
+                      <option key={cat.id} value={cat.id}>
+                        {cat.name}
+                      </option>
+                    ))
+                  )}
                 </select>
               </div>
   
               {/* Submit Button */}
               <button
                 type="submit"
-                className="w-full rounded-lg bg-indigo-600 px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
+                disabled={isLoading || categories.length === 0}
+                className="w-full rounded-lg bg-indigo-600 px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed"
               >
-                Add Expense
+                {isLoading ? 'Adding...' : 'Add Expense'}
               </button>
             </form>
   
