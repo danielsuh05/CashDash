@@ -195,18 +195,18 @@ export default function ProgressList() {
             >
               {/* Category Header */}
               <div className="mb-2">
-                <div className="text-base font-semibold text-black">{item.name}</div>
+                <div className="text-sm font-semibold text-black">{item.name}</div>
               </div>
 
               {/* Spending Details */}
-              <div className="mb-4 flex items-baseline gap-1">
+              <div className="mb-3 flex items-baseline gap-1">
                 <span 
-                  className="text-4xl font-semibold"
+                  className="text-2xl font-semibold"
                   style={{ color: categoryColor }}
                 >
                   {formatCurrency(item.spent)}
                 </span>
-                <span className="text-4xl text-slate-400">/ {formatCurrency(item.budget)}</span>
+                <span className="text-2xl text-slate-400">/ {formatCurrency(item.budget)}</span>
                 {isEditing && (
                   <div className="ml-2 flex items-center gap-1">
                     <div className="relative">
@@ -239,7 +239,7 @@ export default function ProgressList() {
               </div>
 
               {/* Progress bar */}
-              <div className="relative h-10 w-full overflow-hidden rounded-full bg-slate-200">
+              <div className="relative h-4 w-full overflow-hidden rounded-full bg-slate-200">
                 <div
                   className="h-full transition-all"
                   style={{
