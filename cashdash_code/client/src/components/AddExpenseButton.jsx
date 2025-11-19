@@ -6,8 +6,11 @@ export function FloatingActionButton() {
     const [isOpen, setIsOpen] = React.useState(false);
     const [expenseName, setExpenseName] = React.useState("");
     const [amount, setAmount] = React.useState("");
-    const [category, setCategory] = React.useState("");
+    const [selectedCategory, setSelectedCategory] = React.useState(null);
     const [categories, setCategories] = React.useState([]);
+    const [searchTerm, setSearchTerm] = React.useState("");
+    const [showDropdown, setShowDropdown] = React.useState(false);
+    const [loadingCategories, setLoadingCategories] = React.useState(true);
     const [isLoading, setIsLoading] = React.useState(false);
     const [error, setError] = React.useState("");
 
@@ -16,19 +19,56 @@ export function FloatingActionButton() {
         loadCategories();
     }, []);
 
+    // Close dropdown when clicking outside
+    React.useEffect(() => {
+        const handleClickOutside = (event) => {
+            if (showDropdown && !event.target.closest('.expense-category-search-container')) {
+                setShowDropdown(false);
+            }
+        };
+
+        document.addEventListener('mousedown', handleClickOutside);
+        return () => {
+            document.removeEventListener('mousedown', handleClickOutside);
+        };
+    }, [showDropdown]);
+
     const loadCategories = async () => {
         try {
+            setLoadingCategories(true);
             const categoriesData = await getCategories();
             setCategories(categoriesData);
-            if (categoriesData.length > 0) {
-                setCategory(categoriesData[0].id.toString());
-            }
+            // Don't auto-select first category - let user search and select
         } catch (err) {
             console.error('Failed to load categories:', err);
             setError('Failed to load categories');
+        } finally {
+            setLoadingCategories(false);
         }
     };
   
+    // Filter categories based on search term
+    const filteredCategories = categories.filter(category =>
+        category.name.toLowerCase().includes(searchTerm.toLowerCase())
+    );
+
+    const handleCategorySelect = (category) => {
+        setSelectedCategory(category);
+        setSearchTerm(category.name);
+        setShowDropdown(false);
+    };
+
+    const handleSearchChange = (e) => {
+        const value = e.target.value;
+        setSearchTerm(value);
+        setShowDropdown(true);
+        
+        // Clear selected category if search doesn't match
+        if (selectedCategory && !selectedCategory.name.toLowerCase().includes(value.toLowerCase())) {
+            setSelectedCategory(null);
+        }
+    };
+
     const handleSubmit = async (e) => {
       e.preventDefault();
       setIsLoading(true);
@@ -38,13 +78,14 @@ export function FloatingActionButton() {
         await createExpense({
           title: expenseName,
           amount: amount,
-          category_id: category
+          category_id: selectedCategory.id
         });
         
         // Reset form on success
         setExpenseName("");
         setAmount("");
-        setCategory(categories.length > 0 ? categories[0].id.toString() : "");
+        setSelectedCategory(null);
+        setSearchTerm("");
         setIsOpen(false);
         
         // You might want to trigger a refresh of the dashboard here
@@ -131,34 +172,62 @@ export function FloatingActionButton() {
                 </div>
               </div>
   
-              {/* Category */}
-              <div>
+              {/* Category Search */}
+              <div className="relative">
                 <label className="mb-1 block text-sm font-medium text-slate-700">
                   Category
                 </label>
-                <select
-                  value={category}
-                  onChange={(e) => setCategory(e.target.value)}
-                  required
-                  disabled={isLoading}
-                  className="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 transition focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 disabled:opacity-50"
-                >
-                  {categories.length === 0 ? (
-                    <option value="">Loading categories...</option>
-                  ) : (
-                    categories.map((cat) => (
-                      <option key={cat.id} value={cat.id}>
-                        {cat.name}
-                      </option>
-                    ))
-                  )}
-                </select>
+                {loadingCategories ? (
+                  <div className="w-full rounded-lg border border-slate-300 bg-slate-50 px-3 py-2 text-sm text-slate-500">
+                    Loading categories...
+                  </div>
+                ) : (
+                  <div className="relative expense-category-search-container">
+                    <input
+                      type="text"
+                      value={searchTerm}
+                      onChange={handleSearchChange}
+                      onFocus={() => setShowDropdown(true)}
+                      placeholder="Search for a category..."
+                      required
+                      disabled={isLoading}
+                      className={`w-full rounded-lg border px-3 py-2 text-sm text-slate-900 placeholder-slate-400 transition focus:outline-none focus:ring-2 focus:ring-indigo-500/20 disabled:opacity-50 ${
+                        selectedCategory 
+                          ? 'border-green-300 bg-green-50 focus:border-green-500' 
+                          : 'border-slate-300 bg-white focus:border-indigo-500'
+                      }`}
+                    />
+                    
+                    {/* Dropdown */}
+                    {showDropdown && filteredCategories.length > 0 && (
+                      <div className="absolute z-10 mt-1 max-h-48 w-full overflow-auto rounded-lg border border-slate-200 bg-white shadow-lg">
+                        {filteredCategories.map((category) => (
+                          <button
+                            key={category.id}
+                            type="button"
+                            onClick={() => handleCategorySelect(category)}
+                            className="block w-full px-3 py-2 text-left text-sm text-slate-900 hover:bg-indigo-50 hover:text-indigo-900 transition"
+                          >
+                            {category.name}
+                          </button>
+                        ))}
+                      </div>
+                    )}
+                    
+                    {/* No results message */}
+                    {showDropdown && searchTerm && filteredCategories.length === 0 && (
+                      <div className="absolute z-10 mt-1 w-full rounded-lg border border-slate-200 bg-white p-3 shadow-lg">
+                        <p className="text-sm text-slate-500">No categories found matching "{searchTerm}"</p>
+                      </div>
+                    )}
+                  </div>
+                )}
               </div>
   
               {/* Submit Button */}
               <button
                 type="submit"
-                disabled={isLoading || categories.length === 0}
+                disabled={isLoading || !selectedCategory}
                 className="w-full rounded-lg bg-indigo-600 px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 {isLoading ? 'Adding...' : 'Add Expense'}
