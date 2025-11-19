@@ -89,18 +89,23 @@
   flex-shrink: 0; /* Prevent cards from shrinking and getting cropped */
 }
 
+.purchase-card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16px;
+}
+
 .purchase-card-date {
   font-size: 16px;
   font-weight: bold;
   color: #000;
-  margin-bottom: 8px; 
 }
 
 .purchase-card-total {
-  font-size: 14px;
-  font-weight: 600;
-  color: #475569;
-  margin-bottom: 16px;
+  font-size: 16px;
+  font-weight: bold;
+  color: #000;
 }
 
 .purchase-card-list {

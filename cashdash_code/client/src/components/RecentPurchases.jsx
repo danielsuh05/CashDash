@@ -203,9 +203,11 @@ function PurchaseDayCard({ date, purchases, formatCurrency }) {
 
   return (
     <div className="purchase-card">
-      <div className="purchase-card-date">{formattedDate}</div>
-      <div className="purchase-card-total">
-        Total: {formatCurrency(totalSpent)}
+      <div className="purchase-card-header">
+        <div className="purchase-card-date">{formattedDate}</div>
+        <div className="purchase-card-total">
+          {formatCurrency(totalSpent)}
+        </div>
       </div>
       <div className="purchase-card-list">
         {purchases.map((purchase, index) => (
