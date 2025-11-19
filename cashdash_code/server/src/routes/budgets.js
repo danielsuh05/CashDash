@@ -4,6 +4,26 @@ import { supabaseAdmin } from '../utils/supabaseAdmin.js'
 
 export const router = express.Router()
 
+// Get all categories for autocomplete
+router.get('/budgets/categories', requireAuth, async (req, res) => {
+  try {
+    const { data: categories, error } = await supabaseAdmin
+      .from('categories')
+      .select('id, name')
+      .order('name')
+
+    if (error) {
+      console.error('Error fetching categories:', error)
+      return res.status(500).json({ error: error.message })
+    }
+
+    res.json(categories)
+  } catch (error) {
+    console.error('Unexpected error in GET /categories:', error)
+    res.status(500).json({ error: 'Internal server error' })
+  }
+})
+
 // Get budgets with spending data for the current user
 router.get('/budgets', requireAuth, async (req, res) => {
   const user = req.user
@@ -140,10 +160,10 @@ router.patch('/budgets', requireAuth, async (req, res) => {
 
 router.post('/budgets', requireAuth, async (req, res) => {
   const user = req.user
-  const { categoryName, budget } = req.body
+  const { categoryId, budget } = req.body
 
-  if (!categoryName || typeof categoryName !== 'string' || categoryName.trim().length === 0) {
-    return res.status(400).json({ error: 'Category name is required' })
+  if (!categoryId || typeof categoryId !== 'number') {
+    return res.status(400).json({ error: 'Category ID is required' })
   }
 
   if (typeof budget !== 'number' || budget <= 0) {
@@ -154,48 +174,33 @@ router.post('/budgets', requireAuth, async (req, res) => {
     const now = new Date()
     const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1).toISOString()
 
-    // check if not the same name
-    const { data: existingCategory, error: checkError } = await supabaseAdmin
+    // Verify the category exists
+    const { data: category, error: categoryError } = await supabaseAdmin
       .from('categories')
+      .select('id, name')
+      .eq('id', categoryId)
+      .single()
+
+    if (categoryError || !category) {
+      return res.status(404).json({ error: 'Category not found' })
+    }
+
+    // Check if budget already exists for this category and user in current month
+    const { data: existingBudget, error: checkError } = await supabaseAdmin
+      .from('budgets')
       .select('id')
-      .eq('name', categoryName.trim())
+      .eq('user_id', user.id)
+      .eq('category_id', categoryId)
+      .gte('start_date', startOfMonth)
       .maybeSingle()
 
     if (checkError) {
-      console.error('Error checking category:', checkError)
+      console.error('Error checking existing budget:', checkError)
       return res.status(500).json({ error: checkError.message })
     }
 
-    let categoryId
-
-    if (existingCategory) {
-      // ensure not already a category
-      const { data: existingBudget } = await supabaseAdmin
-        .from('budgets')
-        .select('id')
-        .eq('user_id', user.id)
-        .eq('category_id', existingCategory.id)
-        .gte('start_date', startOfMonth)
-        .maybeSingle()
-
-      if (existingBudget) {
-        return res.status(400).json({ error: 'Budget already exists for this category this month' })
-      }
-
-      categoryId = existingCategory.id
-    } else {
-      const { data: newCategory, error: categoryError } = await supabaseAdmin
-        .from('categories')
-        .insert({ name: categoryName.trim() })
-        .select()
-        .single()
-
-      if (categoryError) {
-        console.error('Error creating category:', categoryError)
-        return res.status(500).json({ error: categoryError.message })
-      }
-
-      categoryId = newCategory.id
+    if (existingBudget) {
+      return res.status(400).json({ error: 'Budget already exists for this category this month' })
     }
 
     const budgetCents = Math.round(budget * 100)
@@ -220,7 +225,8 @@ router.post('/budgets', requireAuth, async (req, res) => {
       success: true,
       budget: {
         id: newBudget.id,
-        category: categoryName.trim(),
+        category: category.name,
+        categoryId: category.id,
         limit: budget,
         spent: 0
       }

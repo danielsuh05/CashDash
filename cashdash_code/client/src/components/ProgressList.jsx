@@ -86,9 +86,9 @@ export default function ProgressList() {
     setEditValue("");
   };
 
-  const handleAddBudget = async (categoryName, budget) => {
+  const handleAddBudget = async (categoryId, budget) => {
     try {
-      await createBudget(categoryName, budget);
+      await createBudget(categoryId, budget);
 
       await fetchBudgets();
       setShowAddModal(false);
@@ -259,16 +259,73 @@ export default function ProgressList() {
 }
 
 function AddBudgetModal({ onClose, onAdd }) {
-  const [name, setName] = React.useState("");
+  const [selectedCategory, setSelectedCategory] = React.useState(null);
   const [budget, setBudget] = React.useState("");
   const [isSubmitting, setIsSubmitting] = React.useState(false);
+  const [categories, setCategories] = React.useState([]);
+  const [searchTerm, setSearchTerm] = React.useState("");
+  const [showDropdown, setShowDropdown] = React.useState(false);
+  const [loadingCategories, setLoadingCategories] = React.useState(true);
+
+  // Fetch categories on component mount
+  React.useEffect(() => {
+    const fetchCategories = async () => {
+      try {
+        const { getCategories } = await import('../services/budgets.js');
+        const categoriesData = await getCategories();
+        setCategories(categoriesData);
+      } catch (error) {
+        console.error('Error fetching categories:', error);
+      } finally {
+        setLoadingCategories(false);
+      }
+    };
+
+    fetchCategories();
+  }, []);
+
+  // Close dropdown when clicking outside
+  React.useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (showDropdown && !event.target.closest('.category-search-container')) {
+        setShowDropdown(false);
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, [showDropdown]);
+
+  // Filter categories based on search term
+  const filteredCategories = categories.filter(category =>
+    category.name.toLowerCase().includes(searchTerm.toLowerCase())
+  );
+
+  const handleCategorySelect = (category) => {
+    setSelectedCategory(category);
+    setSearchTerm(category.name);
+    setShowDropdown(false);
+  };
+
+  const handleSearchChange = (e) => {
+    const value = e.target.value;
+    setSearchTerm(value);
+    setShowDropdown(true);
+    
+    // Clear selected category if search doesn't match
+    if (selectedCategory && !selectedCategory.name.toLowerCase().includes(value.toLowerCase())) {
+      setSelectedCategory(null);
+    }
+  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (name && budget && parseFloat(budget) > 0) {
+    if (selectedCategory && budget && parseFloat(budget) > 0) {
       setIsSubmitting(true);
       try {
-        await onAdd(name, parseFloat(budget));
+        await onAdd(selectedCategory.id, parseFloat(budget));
       } finally {
         setIsSubmitting(false);
       }
@@ -301,19 +358,55 @@ function AddBudgetModal({ onClose, onAdd }) {
         </div>
 
         <form onSubmit={handleSubmit} className="space-y-4">
-          {/* Category Name */}
-          <div>
+          {/* Category Search */}
+          <div className="relative">
             <label className="mb-1 block text-sm font-medium text-slate-700">
-              Category Name
+              Category
             </label>
-            <input
-              type="text"
-              value={name}
-              onChange={(e) => setName(e.target.value)}
-              placeholder="e.g., Food & Dining"
-              required
-              className="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 placeholder-slate-400 transition focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/20"
-            />
+            {loadingCategories ? (
+              <div className="w-full rounded-lg border border-slate-300 bg-slate-50 px-3 py-2 text-sm text-slate-500">
+                Loading categories...
+              </div>
+            ) : (
+              <div className="relative category-search-container">
+                <input
+                  type="text"
+                  value={searchTerm}
+                  onChange={handleSearchChange}
+                  onFocus={() => setShowDropdown(true)}
+                  placeholder="Search for a category..."
+                  required
+                  className={`w-full rounded-lg border px-3 py-2 text-sm text-slate-900 placeholder-slate-400 transition focus:outline-none focus:ring-2 focus:ring-indigo-500/20 ${
+                    selectedCategory 
+                      ? 'border-green-300 bg-green-50 focus:border-green-500' 
+                      : 'border-slate-300 bg-white focus:border-indigo-500'
+                  }`}
+                />
+                
+                {/* Dropdown */}
+                {showDropdown && filteredCategories.length > 0 && (
+                  <div className="absolute z-10 mt-1 max-h-48 w-full overflow-auto rounded-lg border border-slate-200 bg-white shadow-lg">
+                    {filteredCategories.map((category) => (
+                      <button
+                        key={category.id}
+                        type="button"
+                        onClick={() => handleCategorySelect(category)}
+                        className="block w-full px-3 py-2 text-left text-sm text-slate-900 hover:bg-indigo-50 hover:text-indigo-900 transition"
+                      >
+                        {category.name}
+                      </button>
+                    ))}
+                  </div>
+                )}
+                
+                {/* No results message */}
+                {showDropdown && searchTerm && filteredCategories.length === 0 && (
+                  <div className="absolute z-10 mt-1 w-full rounded-lg border border-slate-200 bg-white p-3 shadow-lg">
+                    <p className="text-sm text-slate-500">No categories found matching "{searchTerm}"</p>
+                  </div>
+                )}
+              </div>
+            )}
           </div>
 
           {/* Budget Amount */}
@@ -350,7 +443,7 @@ function AddBudgetModal({ onClose, onAdd }) {
             </button>
             <button
               type="submit"
-              disabled={isSubmitting}
+              disabled={isSubmitting || !selectedCategory}
               className="flex-1 rounded-lg bg-indigo-600 px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed"
             >
               {isSubmitting ? 'Adding...' : 'Add Budget'}
