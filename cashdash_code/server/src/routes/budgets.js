@@ -4,12 +4,15 @@ import { supabaseAdmin } from '../utils/supabaseAdmin.js'
 
 export const router = express.Router()
 
-// Get all categories for autocomplete
+// Get all categories for autocomplete (user-specific)
 router.get('/budgets/categories', requireAuth, async (req, res) => {
+  const user = req.user
+
   try {
     const { data: categories, error } = await supabaseAdmin
       .from('categories')
       .select('id, name')
+      .eq('user_id', user.id)
       .order('name')
 
     if (error) {
@@ -118,6 +121,7 @@ router.patch('/budgets', requireAuth, async (req, res) => {
       .from('categories')
       .select('id')
       .eq('name', categoryName)
+      .eq('user_id', user.id)
       .single()
 
     if (categoryError || !category) {
@@ -160,10 +164,10 @@ router.patch('/budgets', requireAuth, async (req, res) => {
 
 router.post('/budgets', requireAuth, async (req, res) => {
   const user = req.user
-  const { categoryId, budget } = req.body
+  const { categoryName, budget } = req.body
 
-  if (!categoryId || typeof categoryId !== 'number') {
-    return res.status(400).json({ error: 'Category ID is required' })
+  if (!categoryName || typeof categoryName !== 'string' || categoryName.trim().length === 0) {
+    return res.status(400).json({ error: 'Category name is required' })
   }
 
   if (typeof budget !== 'number' || budget <= 0) {
@@ -173,16 +177,38 @@ router.post('/budgets', requireAuth, async (req, res) => {
   try {
     const now = new Date()
     const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1).toISOString()
+    const trimmedCategoryName = categoryName.trim()
 
-    // Verify the category exists
-    const { data: category, error: categoryError } = await supabaseAdmin
+    // Check if category exists for this user
+    let { data: category, error: categoryError } = await supabaseAdmin
       .from('categories')
       .select('id, name')
-      .eq('id', categoryId)
-      .single()
+      .eq('name', trimmedCategoryName)
+      .eq('user_id', user.id)
+      .maybeSingle()
 
-    if (categoryError || !category) {
-      return res.status(404).json({ error: 'Category not found' })
+    if (categoryError) {
+      console.error('Error checking category:', categoryError)
+      return res.status(500).json({ error: categoryError.message })
+    }
+
+    // If category doesn't exist, create it
+    if (!category) {
+      const { data: newCategory, error: createCategoryError } = await supabaseAdmin
+        .from('categories')
+        .insert({
+          name: trimmedCategoryName,
+          user_id: user.id
+        })
+        .select('id, name')
+        .single()
+
+      if (createCategoryError) {
+        console.error('Error creating category:', createCategoryError)
+        return res.status(500).json({ error: createCategoryError.message })
+      }
+
+      category = newCategory
     }
 
     // Check if budget already exists for this category and user in current month
@@ -190,7 +216,7 @@ router.post('/budgets', requireAuth, async (req, res) => {
       .from('budgets')
       .select('id')
       .eq('user_id', user.id)
-      .eq('category_id', categoryId)
+      .eq('category_id', category.id)
       .gte('start_date', startOfMonth)
       .maybeSingle()
 
@@ -209,7 +235,7 @@ router.post('/budgets', requireAuth, async (req, res) => {
       .from('budgets')
       .insert({
         user_id: user.id,
-        category_id: categoryId,
+        category_id: category.id,
         limit_cents: budgetCents,
         start_date: startOfMonth
       })

@@ -18,10 +18,10 @@ export async function updateBudget(categoryName, newBudget) {
   })
 }
 
-// Create a new budget using category ID
-export async function createBudget(categoryId, budget) {
+// Create a new budget using category name (auto-creates category if needed)
+export async function createBudget(categoryName, budget) {
   return await apiCall('/budgets', {
     method: 'POST',
-    body: JSON.stringify({ categoryId, budget })
+    body: JSON.stringify({ categoryName, budget })
   })
 }

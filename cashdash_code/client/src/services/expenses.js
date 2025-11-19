@@ -41,7 +41,7 @@ export async function getExpenseCategories() {
 
 // Create a new expense
 export async function createExpense(expenseData) {
-  const { title, amount, category_id } = expenseData
+  const { title, amount, categoryName } = expenseData
   
   // Convert amount from dollars to cents
   const amount_cents = Math.round(parseFloat(amount) * 100)
@@ -54,8 +54,7 @@ export async function createExpense(expenseData) {
     body: JSON.stringify({
       title,
       amount_cents,
-      // category_id is expected to be a UUID string by the server; do not coerce to number
-      category_id: category_id
+      categoryName
     })
   })
 }
