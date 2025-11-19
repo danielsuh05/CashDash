@@ -6,7 +6,7 @@ import {interpolateSpectral} from 'd3-scale-chromatic';
 const generateRainbowColors = (count) => {
   const colors = [];
   for (let i = 0; i < count; i++) {
-    const t = count > 1 ? (i + 0.2) / (count - 1) : 0.5;
+    const t = count > 1 ? (i + 0.2) / (count - 1) : 0.95;
     colors.push(interpolateSpectral(t));
   }
   return colors;
@@ -78,6 +78,17 @@ function CustomPieChart({ data }) {
 
   // Create SVG path for donut slice
   const createSlicePath = (startAngle, endAngle, outerRadius, innerRadius) => {
+    // Handle full circle case (single category)
+    if (endAngle - startAngle >= 359.9) {
+      return `M ${center} ${center - outerRadius}
+              A ${outerRadius} ${outerRadius} 0 1 1 ${center} ${center + outerRadius}
+              A ${outerRadius} ${outerRadius} 0 1 1 ${center} ${center - outerRadius}
+              M ${center} ${center - innerRadius}
+              A ${innerRadius} ${innerRadius} 0 1 0 ${center} ${center + innerRadius}
+              A ${innerRadius} ${innerRadius} 0 1 0 ${center} ${center - innerRadius}
+              Z`;
+    }
+
     const startRad = (startAngle * Math.PI) / 180;
     const endRad = (endAngle * Math.PI) / 180;
     
