@@ -86,9 +86,9 @@ export default function ProgressList() {
     setEditValue("");
   };
 
-  const handleAddBudget = async (categoryId, budget) => {
+  const handleAddBudget = async (categoryName, budget) => {
     try {
-      await createBudget(categoryId, budget);
+      await createBudget(categoryName, budget);
 
       await fetchBudgets();
       setShowAddModal(false);
@@ -314,18 +314,20 @@ function AddBudgetModal({ onClose, onAdd }) {
     setSearchTerm(value);
     setShowDropdown(true);
     
-    // Clear selected category if search doesn't match
-    if (selectedCategory && !selectedCategory.name.toLowerCase().includes(value.toLowerCase())) {
+    // Clear selected category if search doesn't exactly match selected category
+    if (selectedCategory && selectedCategory.name.toLowerCase() !== value.toLowerCase()) {
       setSelectedCategory(null);
     }
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (selectedCategory && budget && parseFloat(budget) > 0) {
+    const categoryNameToUse = selectedCategory ? selectedCategory.name : searchTerm.trim();
+    
+    if (categoryNameToUse && budget && parseFloat(budget) > 0) {
       setIsSubmitting(true);
       try {
-        await onAdd(selectedCategory.id, parseFloat(budget));
+        await onAdd(categoryNameToUse, parseFloat(budget));
       } finally {
         setIsSubmitting(false);
       }
@@ -399,10 +401,11 @@ function AddBudgetModal({ onClose, onAdd }) {
                   </div>
                 )}
                 
-                {/* No results message */}
+                {/* No results message with option to create new */}
                 {showDropdown && searchTerm && filteredCategories.length === 0 && (
                   <div className="absolute z-10 mt-1 w-full rounded-lg border border-slate-200 bg-white p-3 shadow-lg">
-                    <p className="text-sm text-slate-500">No categories found matching "{searchTerm}"</p>
+                    <p className="text-sm text-slate-500 mb-2">No categories found matching "{searchTerm}"</p>
+                    <p className="text-xs text-indigo-600">✨ Press Enter or click "Add Budget" to create this as a new category</p>
                   </div>
                 )}
               </div>
@@ -443,7 +446,7 @@ function AddBudgetModal({ onClose, onAdd }) {
             </button>
             <button
               type="submit"
-              disabled={isSubmitting || !selectedCategory}
+              disabled={isSubmitting || (!selectedCategory && !searchTerm.trim())}
               className="flex-1 rounded-lg bg-indigo-600 px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed"
             >
               {isSubmitting ? 'Adding...' : 'Add Budget'}

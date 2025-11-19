@@ -63,8 +63,8 @@ export function FloatingActionButton() {
         setSearchTerm(value);
         setShowDropdown(true);
         
-        // Clear selected category if search doesn't match
-        if (selectedCategory && !selectedCategory.name.toLowerCase().includes(value.toLowerCase())) {
+        // Clear selected category if search doesn't exactly match selected category
+        if (selectedCategory && selectedCategory.name.toLowerCase() !== value.toLowerCase()) {
             setSelectedCategory(null);
         }
     };
@@ -75,10 +75,12 @@ export function FloatingActionButton() {
       setError("");
 
       try {
+        const categoryNameToUse = selectedCategory ? selectedCategory.name : searchTerm.trim();
+        
         await createExpense({
           title: expenseName,
           amount: amount,
-          category_id: selectedCategory.id
+          categoryName: categoryNameToUse
         });
         
         // Reset form on success
@@ -214,10 +216,11 @@ export function FloatingActionButton() {
                       </div>
                     )}
                     
-                    {/* No results message */}
+                    {/* No results message with option to create new */}
                     {showDropdown && searchTerm && filteredCategories.length === 0 && (
                       <div className="absolute z-10 mt-1 w-full rounded-lg border border-slate-200 bg-white p-3 shadow-lg">
-                        <p className="text-sm text-slate-500">No categories found matching "{searchTerm}"</p>
+                        <p className="text-sm text-slate-500 mb-2">No categories found matching "{searchTerm}"</p>
+                        <p className="text-xs text-indigo-600">✨ Press Enter or click "Add Expense" to create this as a new category</p>
                       </div>
                     )}
                   </div>
@@ -227,7 +230,7 @@ export function FloatingActionButton() {
               {/* Submit Button */}
               <button
                 type="submit"
-                disabled={isLoading || !selectedCategory}
+                disabled={isLoading || (!selectedCategory && !searchTerm.trim())}
                 className="w-full rounded-lg bg-indigo-600 px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 {isLoading ? 'Adding...' : 'Add Expense'}

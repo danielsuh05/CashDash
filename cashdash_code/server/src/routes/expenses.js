@@ -5,12 +5,15 @@ import { startOfMonth, endOfMonth } from '../utils/getDates.js';
 
 export const router = express.Router()
 
-// Get all available categories
+// Get all available categories (user-specific)
 router.get('/categories', requireAuth, async (req, res) => {
+  const user = req.user
+
   try {
     const { data, error } = await supabaseAdmin
       .from('categories')
       .select('id, name')
+      .eq('user_id', user.id)
       .order('name')
 
     if (error) {
@@ -27,12 +30,12 @@ router.get('/categories', requireAuth, async (req, res) => {
 // Create a new expense
 router.post('/expenses', requireAuth, async (req, res) => {
   const user = req.user
-  const { title, amount_cents, category_id } = req.body
+  const { title, amount_cents, categoryName } = req.body
 
   // Validate required fields
-  if (!title || amount_cents === undefined || !category_id) {
+  if (!title || amount_cents === undefined || !categoryName) {
     return res.status(400).json({ 
-      error: 'Missing required fields: title, amount_cents, and category_id are required' 
+      error: 'Missing required fields: title, amount_cents, and categoryName are required' 
     })
   }
 
@@ -43,14 +46,52 @@ router.post('/expenses', requireAuth, async (req, res) => {
     })
   }
 
+  if (typeof categoryName !== 'string' || categoryName.trim().length === 0) {
+    return res.status(400).json({ error: 'Category name must be a non-empty string' })
+  }
+
   try {
+    const trimmedCategoryName = categoryName.trim()
+
+    // Check if category exists for this user
+    let { data: category, error: categoryError } = await supabaseAdmin
+      .from('categories')
+      .select('id, name')
+      .eq('name', trimmedCategoryName)
+      .eq('user_id', user.id)
+      .maybeSingle()
+
+    if (categoryError) {
+      console.error('Error checking category:', categoryError)
+      return res.status(500).json({ error: categoryError.message })
+    }
+
+    // If category doesn't exist, create it
+    if (!category) {
+      const { data: newCategory, error: createCategoryError } = await supabaseAdmin
+        .from('categories')
+        .insert({
+          name: trimmedCategoryName,
+          user_id: user.id
+        })
+        .select('id, name')
+        .single()
+
+      if (createCategoryError) {
+        console.error('Error creating category:', createCategoryError)
+        return res.status(500).json({ error: createCategoryError.message })
+      }
+
+      category = newCategory
+    }
+
     const { data, error } = await supabaseAdmin
       .from('expenses')
       .insert({
         user_id: user.id,
         title: title.trim(),
         amount_cents,
-        category_id,
+        category_id: category.id,
         occurred_at: new Date().toISOString()
       })
       .select(`
