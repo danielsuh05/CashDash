@@ -157,7 +157,7 @@ export default function RecentPurchases({ purchases = [] }) {
         </button>
 
         <div className="recent-purchases-carousel" ref={carouselRef}>
-          {displayData.map((dayData, index) => (
+          {displayData.map((dayData) => (
             <PurchaseDayCard
               key={dayData.date}
               date={dayData.date}

@@ -36,7 +36,7 @@ function getCurrencySymbol(currencyCode) {
     const parts = formatter.formatToParts(1000);
     const symbolPart = parts.find(part => part.type === 'currency');
     return symbolPart ? symbolPart.value : '$';
-  } catch (error) {
+  } catch (err) {
     return '$'; // Fallback to $ if there's an error
   }
 }
