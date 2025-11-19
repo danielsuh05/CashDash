@@ -209,6 +209,7 @@ function PurchaseDayCard({ date, purchases, formatCurrency }) {
           {formatCurrency(totalSpent)}
         </div>
       </div>
+      <div className="purchase-header-divider" />
       <div className="purchase-card-list">
         {purchases.map((purchase, index) => (
           <React.Fragment key={purchase.id || index}>
