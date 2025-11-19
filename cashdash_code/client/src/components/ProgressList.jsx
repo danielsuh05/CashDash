@@ -21,34 +21,6 @@ function percent(spent, budget) {
   return Math.round((spent / budget) * 100);
 }
 
-// Get color for category - using a simple color scheme
-function getCategoryColor(categoryName, index) {
-  const categoryLower = categoryName.toLowerCase();
-  
-  // Check for food-related categories
-  if (categoryLower.includes('food') || categoryLower.includes('dining') || categoryLower.includes('restaurant') || categoryLower.includes('grocery')) {
-    return '#16A34A'; // green-600
-  }
-  
-  // Check for entertainment-related categories
-  if (categoryLower.includes('entertainment') || categoryLower.includes('movie') || categoryLower.includes('game')) {
-    return '#2563EB'; // blue-600
-  }
-  
-  // Default color scheme based on index
-  const colors = [
-    '#16A34A', // green
-    '#2563EB', // blue
-    '#9333EA', // purple
-    '#EA580C', // orange
-    '#DC2626', // red
-    '#CA8A04', // yellow
-  ];
-  
-  return colors[index % colors.length];
-}
-
-
 //ProgressList - Budget progress list matching the provided mock
 
 // Helper function to get currency symbol from currency code
@@ -213,7 +185,8 @@ export default function ProgressList() {
             {items.map((item, index) => {
           const p = percent(item.spent, item.budget);
           const clamped = Math.max(0, Math.min(100, p));
-          const categoryColor = getCategoryColor(item.name, index);
+          const isOverBudget = item.spent > item.budget;
+          const progressColor = isOverBudget ? '#ef4444' : '#6366f1'; // red-500 if over, indigo-500 otherwise
           const currentEditValue = editingValues[index] !== undefined 
             ? editingValues[index] 
             : item.budget.toString();
@@ -232,8 +205,7 @@ export default function ProgressList() {
               {/* Spending Details */}
               <div className="mb-3 flex items-baseline gap-1">
                 <span 
-                  className="text-2xl font-semibold"
-                  style={{ color: categoryColor }}
+                  className="text-2xl font-semibold text-slate-600"
                 >
                   {formatCurrency(item.spent)}
                 </span>
@@ -266,7 +238,7 @@ export default function ProgressList() {
                   className="h-full transition-all"
                   style={{
                     width: `${Math.min(100, clamped)}%`,
-                    backgroundColor: categoryColor,
+                    backgroundColor: progressColor,
                   }}
                 />
               </div>
