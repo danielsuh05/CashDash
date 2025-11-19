@@ -6,7 +6,7 @@ import {interpolateSpectral} from 'd3-scale-chromatic';
 const generateRainbowColors = (count) => {
   const colors = [];
   for (let i = 0; i < count; i++) {
-    const t = count > 1 ? i / (count - 1) : 0.5;
+    const t = count > 1 ? (i + 0.2) / (count - 1) : 0.5;
     colors.push(interpolateSpectral(t));
   }
   return colors;
