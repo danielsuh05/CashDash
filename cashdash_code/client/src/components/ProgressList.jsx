@@ -51,15 +51,32 @@ function getCategoryColor(categoryName, index) {
 
 //ProgressList - Budget progress list matching the provided mock
 
+// Helper function to get currency symbol from currency code
+function getCurrencySymbol(currencyCode) {
+  try {
+    const formatter = new Intl.NumberFormat('en-US', {
+      style: 'currency',
+      currency: currencyCode,
+      minimumFractionDigits: 0,
+      maximumFractionDigits: 0,
+    });
+    // Extract the symbol from a formatted number
+    const parts = formatter.formatToParts(1000);
+    const symbolPart = parts.find(part => part.type === 'currency');
+    return symbolPart ? symbolPart.value : '$';
+  } catch (error) {
+    return '$'; // Fallback to $ if there's an error
+  }
+}
+
 export default function ProgressList() {
-  const { formatCurrency } = useCurrency();
+  const { formatCurrency, currency } = useCurrency();
   const [items, setItems] = React.useState([]);
   const [loading, setLoading] = React.useState(true);
   const [error, setError] = React.useState(null);
   const [isEditMode, setIsEditMode] = React.useState(false);
   const [showAddModal, setShowAddModal] = React.useState(false);
-  const [editingIndex, setEditingIndex] = React.useState(null);
-  const [editValue, setEditValue] = React.useState("");
+  const [editingValues, setEditingValues] = React.useState({});
 
   const fetchBudgets = React.useCallback(async () => {
     try {
@@ -79,13 +96,18 @@ export default function ProgressList() {
     fetchBudgets();
   }, [fetchBudgets]);
 
-  const handleStartEdit = (index, currentBudget) => {
-    setEditingIndex(index);
-    setEditValue(currentBudget.toString());
+  const handleBudgetChange = (index, value) => {
+    setEditingValues(prev => ({
+      ...prev,
+      [index]: value
+    }));
   };
 
-  const handleSaveEdit = async (index) => {
-    const newBudget = parseFloat(editValue);
+  const handleBudgetBlur = async (index) => {
+    const value = editingValues[index];
+    if (value === undefined) return; // No change made
+    
+    const newBudget = parseFloat(value);
     if (!isNaN(newBudget) && newBudget > 0) {
       try {
         const categoryName = items[index].name;
@@ -97,10 +119,29 @@ export default function ProgressList() {
       } catch (error) {
         console.error('Failed to update budget:', error);
         alert('Failed to update budget: ' + error.message);
+        // Reset to original value on error
+        const updated = {...editingValues};
+        delete updated[index];
+        setEditingValues(updated);
       }
+    } else {
+      // Invalid value so reset to original
+      const updated = {...editingValues};
+      delete updated[index];
+      setEditingValues(updated);
     }
-    setEditingIndex(null);
-    setEditValue("");
+  };
+
+  const handleBudgetKeyDown = (e, index) => {
+    if (e.key === 'Enter') {
+      e.target.blur(); 
+    } else if (e.key === 'Escape') {
+      // Reset to original value
+      const updated = {...editingValues};
+      delete updated[index];
+      setEditingValues(updated);
+      e.target.blur();
+    }
   };
 
   const handleAddBudget = async (categoryName, budget) => {
@@ -115,18 +156,6 @@ export default function ProgressList() {
     }
   };
 
-  const handleCancelEdit = () => {
-    setEditingIndex(null);
-    setEditValue("");
-  };
-
-  const handleKeyDown = (e, index) => {
-    if (e.key === 'Enter') {
-      handleSaveEdit(index);
-    } else if (e.key === 'Escape') {
-      handleCancelEdit();
-    }
-  };
 
   const actionButtons = (
     <div className="flex items-center gap-2">
@@ -184,8 +213,10 @@ export default function ProgressList() {
             {items.map((item, index) => {
           const p = percent(item.spent, item.budget);
           const clamped = Math.max(0, Math.min(100, p));
-          const isEditing = isEditMode && editingIndex === index;
           const categoryColor = getCategoryColor(item.name, index);
+          const currentEditValue = editingValues[index] !== undefined 
+            ? editingValues[index] 
+            : item.budget.toString();
 
           return (
             <div
@@ -206,35 +237,26 @@ export default function ProgressList() {
                 >
                   {formatCurrency(item.spent)}
                 </span>
-                <span className="text-2xl text-slate-400">/ {formatCurrency(item.budget)}</span>
-                {isEditing && (
-                  <div className="ml-2 flex items-center gap-1">
-                    <div className="relative">
-                      <span className="absolute left-2 top-1/2 -translate-y-1/2 text-xs text-slate-500">
-                        $
-                      </span>
-                      <input
-                        type="number"
-                        value={editValue}
-                        onChange={(e) => setEditValue(e.target.value)}
-                        onKeyDown={(e) => handleKeyDown(e, index)}
-                        onBlur={() => handleSaveEdit(index)}
-                        autoFocus
-                        step="0.01"
-                        min="0"
-                        className="w-20 rounded border border-indigo-500 bg-white px-2 py-0.5 pl-5 text-xs text-slate-900 focus:outline-none focus:ring-2 focus:ring-indigo-500/20"
-                      />
-                    </div>
+                <span className="text-2xl text-slate-400">/ </span>
+                {isEditMode ? (
+                  <div className="relative inline-block">
+                    <span className="absolute left-2 top-1/2 -translate-y-1/2 text-2xl font-semibold text-slate-400 pointer-events-none z-10">
+                      {getCurrencySymbol(currency)}
+                    </span>
+                    <input
+                      type="number"
+                      value={currentEditValue}
+                      onChange={(e) => handleBudgetChange(index, e.target.value)}
+                      onBlur={() => handleBudgetBlur(index)}
+                      onKeyDown={(e) => handleBudgetKeyDown(e, index)}
+                      step="0.01"
+                      min="0"
+                      className="text-2xl font-semibold text-slate-400 bg-white border border-slate-300 rounded px-2 py-0 pl-6 pr-2 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 w-28 leading-none [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+                      style={{ lineHeight: '1' }}
+                    />
                   </div>
-                )}
-                {!isEditing && isEditMode && (
-                  <button
-                    onClick={() => handleStartEdit(index, item.budget)}
-                    className="ml-2 text-xs text-slate-600 hover:text-indigo-600 transition underline decoration-dotted"
-                    title="Click to edit budget"
-                  >
-                    Edit
-                  </button>
+                ) : (
+                  <span className="text-2xl font-semibold text-slate-400">{formatCurrency(item.budget)}</span>
                 )}
               </div>
 
