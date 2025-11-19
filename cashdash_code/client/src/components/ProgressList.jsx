@@ -186,7 +186,9 @@ export default function ProgressList() {
           const p = percent(item.spent, item.budget);
           const clamped = Math.max(0, Math.min(100, p));
           const isOverBudget = item.spent > item.budget;
-          const progressColor = isOverBudget ? '#ef4444' : '#6366f1'; // red-500 if over, indigo-500 otherwise
+          const isNearBudget = !isOverBudget && p >= 80; // within 20% of budget (80% or more)
+          // Color priority: red if over, orange if within 20%, indigo otherwise
+          const progressColor = isOverBudget ? '#ef4444' : (isNearBudget ? '#f97316' : '#6366f1'); // red-500 if over, orange-500 if near, indigo-500 otherwise
           const currentEditValue = editingValues[index] !== undefined 
             ? editingValues[index] 
             : item.budget.toString();
