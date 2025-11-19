@@ -89,17 +89,29 @@
   flex-shrink: 0; /* Prevent cards from shrinking and getting cropped */
 }
 
+.purchase-card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16px;
+}
+
 .purchase-card-date {
   font-size: 16px;
   font-weight: bold;
   color: #000;
-  margin-bottom: 12px; 
+}
+
+.purchase-card-total {
+  font-size: 16px;
+  font-weight: bold;
+  color: #000;
 }
 
 .purchase-card-list {
   display: flex;
   flex-direction: column;
-  gap: 4px; 
+  gap: 0; 
   flex: 1;
   margin-bottom: 32px; 
 }
@@ -108,14 +120,13 @@
   display: flex;
   align-items: center;
   gap: 12px;
-  padding: 4px 0; 
+  padding: 8px 0; 
 }
 
-.purchase-item-dot {
-  width: 14px;
-  height: 14px;
-  border-radius: 50%;
-  flex-shrink: 0;
+.purchase-item-divider {
+  height: 1px;
+  background-color: #E2E8F0;
+  margin: 4px 0;
 }
 
 .purchase-item-details {
