@@ -16,8 +16,8 @@ function Panel({ title, children, action = null }) {
   return (
     <section className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm md:p-5">
       {title && (
-        <div className="mb-3 flex items-center justify-between">
-          <h3 className="text-sm font-semibold tracking-wide text-slate-700">{title}</h3>
+        <div className="mb-5 flex items-center justify-between">
+          <h3 className="text-lg font-bold text-slate-800">{title}</h3>
           {action && <div>{action}</div>}
         </div>
       )}
