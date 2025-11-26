@@ -3,15 +3,6 @@ import { useCurrency } from '../contexts/CurrencyContext.jsx'
 import { getRecentExpenses } from '../services/expenses.js'
 import './RecentPurchases.css'
 
-// Sample color palette for purchase categories
-const PURCHASE_COLORS = [
-  '#16A34A', // green
-  '#9333EA', // purple
-  '#EA580C', // orange
-  '#DC2626', // red
-  '#2563EB', // blue
-  '#CA8A04', // yellow
-]
 
 /**
  * RecentPurchases - A carousel component displaying recent purchases grouped by day
@@ -166,7 +157,7 @@ export default function RecentPurchases({ purchases = [] }) {
         </button>
 
         <div className="recent-purchases-carousel" ref={carouselRef}>
-          {displayData.map((dayData, index) => (
+          {displayData.map((dayData) => (
             <PurchaseDayCard
               key={dayData.date}
               date={dayData.date}
@@ -207,15 +198,23 @@ function PurchaseDayCard({ date, purchases, formatCurrency }) {
     year: 'numeric',
   })
 
+  // Calculate total spent for the day
+  const totalSpent = purchases.reduce((sum, purchase) => sum + (purchase.amount || 0), 0)
+
   return (
     <div className="purchase-card">
-      <div className="purchase-card-date">{formattedDate}</div>
+      <div className="purchase-card-header">
+        <div className="purchase-card-date">{formattedDate}</div>
+        <div className="purchase-card-total">
+          {formatCurrency(totalSpent)}
+        </div>
+      </div>
+      <div className="purchase-header-divider" />
       <div className="purchase-card-list">
-        {purchases.map((purchase, index) => {
-          const color = PURCHASE_COLORS[index % PURCHASE_COLORS.length]
-          return (
-            <div key={purchase.id || index} className="purchase-item">
-              <div className="purchase-item-dot" style={{ backgroundColor: color }} />
+        {purchases.map((purchase, index) => (
+          <React.Fragment key={purchase.id || index}>
+            {index > 0 && <div className="purchase-item-divider" />}
+            <div className="purchase-item">
               <div className="purchase-item-details">
                 <span className="purchase-item-name">{purchase.name || purchase.description || 'Purchase'}</span>
                 {purchase.category && (
@@ -226,8 +225,8 @@ function PurchaseDayCard({ date, purchases, formatCurrency }) {
                 {formatCurrency(purchase.amount || 0)}
               </span>
             </div>
-          )
-        })}
+          </React.Fragment>
+        ))}
       </div>
     </div>
   )
