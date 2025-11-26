@@ -93,6 +93,27 @@ router.post('/expenses', requireAuth, async (req, res) => {
       }
 
       category = newCategory
+
+
+
+      const now = new Date()
+      const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1).toISOString()
+      // also add a new budget
+      const { data: newBudget, error: budgetError } = await supabaseAdmin
+      .from('budgets')
+      .insert({
+        user_id: user.id,
+        category_id: category.id,
+        limit_cents: 0,
+        start_date: startOfMonth
+      })
+      .select()
+      .single()
+
+    if (budgetError) {
+      console.error('Error creating budget:', budgetError)
+      return res.status(500).json({ error: budgetError.message })
+    }
     }
 
     const { data, error } = await supabaseAdmin
