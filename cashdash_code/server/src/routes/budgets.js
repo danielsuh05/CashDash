@@ -4,29 +4,6 @@ import { supabaseAdmin } from '../utils/supabaseAdmin.js'
 
 export const router = express.Router()
 
-// Get all categories for autocomplete (user-specific)
-router.get('/budgets/categories', requireAuth, async (req, res) => {
-  const user = req.user
-
-  try {
-    const { data: categories, error } = await supabaseAdmin
-      .from('categories')
-      .select('id, name')
-      .eq('user_id', user.id)
-      .order('name')
-
-    if (error) {
-      console.error('Error fetching categories:', error)
-      return res.status(500).json({ error: error.message })
-    }
-
-    res.json(categories)
-  } catch (error) {
-    console.error('Unexpected error in GET /categories:', error)
-    res.status(500).json({ error: 'Internal server error' })
-  }
-})
-
 // Get budgets with spending data for the current user
 router.get('/budgets', requireAuth, async (req, res) => {
   const user = req.user

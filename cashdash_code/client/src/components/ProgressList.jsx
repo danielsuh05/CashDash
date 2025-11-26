@@ -337,5 +337,3 @@ export default function ProgressList() {
     </Panel>
   );
 }
-
-// Removed AddBudgetModal component as it is no longer used
