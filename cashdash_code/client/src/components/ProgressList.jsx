@@ -47,7 +47,7 @@ export default function ProgressList() {
   const [loading, setLoading] = React.useState(true);
   const [error, setError] = React.useState(null);
   const [isEditMode, setIsEditMode] = React.useState(false);
-  const [showAddModal, setShowAddModal] = React.useState(false);
+  const [newItem, setNewItem] = React.useState(null);
   const [editingValues, setEditingValues] = React.useState({});
 
   const fetchBudgets = React.useCallback(async () => {
@@ -116,15 +116,32 @@ export default function ProgressList() {
     }
   };
 
-  const handleAddBudget = async (categoryName, budget) => {
+  const saveNewItem = async () => {
+    if (!newItem || !newItem.name || !newItem.budget) return;
+    
+    const budgetVal = parseFloat(newItem.budget);
+    if (isNaN(budgetVal) || budgetVal <= 0) {
+      alert("Please enter a valid budget amount");
+      return;
+    }
+    
+    setLoading(true);
     try {
-      await createBudget(categoryName, budget);
-
+      await createBudget(newItem.name, budgetVal);
       await fetchBudgets();
-      setShowAddModal(false);
+      setNewItem(null);
     } catch (err) {
       console.error('Error creating budget:', err);
       alert('Failed to create budget: ' + err.message);
+      setLoading(false);
+    }
+  };
+
+  const handleNewItemKeyDown = (e) => {
+    if (e.key === 'Enter') {
+      saveNewItem();
+    } else if (e.key === 'Escape') {
+      setNewItem(null);
     }
   };
 
@@ -152,14 +169,25 @@ export default function ProgressList() {
         )}
       </button>
       <button
-        onClick={() => setShowAddModal(true)}
-        className="rounded-lg bg-indigo-600 px-3 py-1.5 text-xs font-semibold text-white shadow-sm transition hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500"
-        title="Add new budget"
+        onClick={() => newItem ? setNewItem(null) : setNewItem({ name: '', budget: '' })}
+        className={`rounded-lg px-3 py-1.5 text-xs font-semibold text-white shadow-sm transition focus:outline-none focus:ring-2 ${
+          newItem 
+            ? 'bg-red-600 hover:bg-red-700 focus:ring-red-500' 
+            : 'bg-indigo-600 hover:bg-indigo-700 focus:ring-indigo-500'
+        }`}
+        title={newItem ? "Cancel" : "Add new budget"}
       >
-        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="h-4 w-4">
-          <line x1="12" y1="5" x2="12" y2="19" />
-          <line x1="5" y1="12" x2="19" y2="12" />
-        </svg>
+        {newItem ? (
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="h-4 w-4">
+            <line x1="18" y1="6" x2="6" y2="18" />
+            <line x1="6" y1="6" x2="18" y2="18" />
+          </svg>
+        ) : (
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="h-4 w-4">
+            <line x1="12" y1="5" x2="12" y2="19" />
+            <line x1="5" y1="12" x2="19" y2="12" />
+          </svg>
+        )}
       </button>
     </div>
   );
@@ -176,12 +204,66 @@ export default function ProgressList() {
         </div>
       ) : (
         <div className="h-full overflow-auto pr-1">
-        {items.length === 0 ? (
+        {items.length === 0 && !newItem ? (
           <div className="flex h-full items-center justify-center text-slate-500">
             <p className="text-sm">No budgets found. Add a new goal to get started!</p>
           </div>
         ) : (
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+            {newItem && (
+              <div className="flex flex-col">
+                <div className="mb-2">
+                  <input
+                    type="text"
+                    value={newItem.name}
+                    onChange={(e) => setNewItem({ ...newItem, name: e.target.value })}
+                    onKeyDown={handleNewItemKeyDown}
+                    placeholder="Category Name"
+                    autoFocus
+                    className="text-sm font-semibold text-black bg-white border border-slate-300 rounded px-2 py-1 w-full focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                  />
+                </div>
+                <div className="mb-3 flex items-baseline gap-1">
+                  <span className="text-2xl font-semibold text-slate-600">
+                    {formatCurrency(0)}
+                  </span>
+                  <span className="text-2xl text-slate-400">/ </span>
+                  <div className="flex items-stretch gap-2">
+                    <div className="relative">
+                      <span className="absolute left-2 top-1/2 -translate-y-1/2 text-2xl font-semibold text-slate-400 pointer-events-none z-10">
+                        {getCurrencySymbol(currency)}
+                      </span>
+                      <input
+                        type="number"
+                        value={newItem.budget}
+                        onChange={(e) => setNewItem({ ...newItem, budget: e.target.value })}
+                        onKeyDown={handleNewItemKeyDown}
+                        placeholder="0.00"
+                        step="0.01"
+                        min="0"
+                        className="text-2xl font-semibold text-slate-400 bg-white border border-slate-300 rounded px-2 py-0 pl-6 pr-2 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 w-28 leading-none [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+                        style={{ lineHeight: '1' }}
+                      />
+                    </div>
+                    <button
+                      onClick={saveNewItem}
+                      className="flex items-center justify-center rounded bg-green-600 px-3 text-xs font-semibold text-white hover:bg-green-700"
+                    >
+                      Save
+                    </button>
+                  </div>
+                </div>
+                <div className="relative h-4 w-full overflow-hidden rounded-full bg-slate-200">
+                  <div
+                    className="h-full transition-all"
+                    style={{
+                      width: '0%',
+                      backgroundColor: '#6366f1',
+                    }}
+                  />
+                </div>
+              </div>
+            )}
             {items.map((item, index) => {
           const p = percent(item.spent, item.budget);
           const clamped = Math.max(0, Math.min(100, p));
@@ -252,213 +334,8 @@ export default function ProgressList() {
         </div>
       )}
 
-      {/* Add Budget Modal */}
-      {showAddModal && (
-        <AddBudgetModal 
-          onClose={() => setShowAddModal(false)}
-          onAdd={handleAddBudget}
-        />
-      )}
     </Panel>
   );
 }
 
-function AddBudgetModal({ onClose, onAdd }) {
-  const [selectedCategory, setSelectedCategory] = React.useState(null);
-  const [budget, setBudget] = React.useState("");
-  const [isSubmitting, setIsSubmitting] = React.useState(false);
-  const [categories, setCategories] = React.useState([]);
-  const [searchTerm, setSearchTerm] = React.useState("");
-  const [showDropdown, setShowDropdown] = React.useState(false);
-  const [loadingCategories, setLoadingCategories] = React.useState(true);
-
-  // Fetch categories on component mount
-  React.useEffect(() => {
-    const fetchCategories = async () => {
-      try {
-        const { getCategories } = await import('../services/budgets.js');
-        const categoriesData = await getCategories();
-        setCategories(categoriesData);
-      } catch (error) {
-        console.error('Error fetching categories:', error);
-      } finally {
-        setLoadingCategories(false);
-      }
-    };
-
-    fetchCategories();
-  }, []);
-
-  // Close dropdown when clicking outside
-  React.useEffect(() => {
-    const handleClickOutside = (event) => {
-      if (showDropdown && !event.target.closest('.category-search-container')) {
-        setShowDropdown(false);
-      }
-    };
-
-    document.addEventListener('mousedown', handleClickOutside);
-    return () => {
-      document.removeEventListener('mousedown', handleClickOutside);
-    };
-  }, [showDropdown]);
-
-  // Filter categories based on search term
-  const filteredCategories = categories.filter(category =>
-    category.name.toLowerCase().includes(searchTerm.toLowerCase())
-  );
-
-  const handleCategorySelect = (category) => {
-    setSelectedCategory(category);
-    setSearchTerm(category.name);
-    setShowDropdown(false);
-  };
-
-  const handleSearchChange = (e) => {
-    const value = e.target.value;
-    setSearchTerm(value);
-    setShowDropdown(true);
-    
-    // Clear selected category if search doesn't exactly match selected category
-    if (selectedCategory && selectedCategory.name.toLowerCase() !== value.toLowerCase()) {
-      setSelectedCategory(null);
-    }
-  };
-
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    const categoryNameToUse = selectedCategory ? selectedCategory.name : searchTerm.trim();
-    
-    if (categoryNameToUse && budget && parseFloat(budget) > 0) {
-      setIsSubmitting(true);
-      try {
-        await onAdd(categoryNameToUse, parseFloat(budget));
-      } finally {
-        setIsSubmitting(false);
-      }
-    }
-  };
-
-  return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm">
-      <div className="relative w-full max-w-md rounded-2xl border border-slate-200 bg-white p-6 shadow-2xl">
-        <div className="mb-4 flex items-center justify-between">
-          <h3 className="text-xl font-bold text-slate-800">Add New Budget</h3>
-          <button
-            onClick={onClose}
-            className="text-slate-400 hover:text-slate-600 transition"
-          >
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="2"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              className="h-6 w-6"
-            >
-              <line x1="18" y1="6" x2="6" y2="18" />
-              <line x1="6" y1="6" x2="18" y2="18" />
-            </svg>
-          </button>
-        </div>
-
-        <form onSubmit={handleSubmit} className="space-y-4">
-          {/* Category Search */}
-          <div className="relative">
-            <label className="mb-1 block text-sm font-medium text-slate-700">
-              Category
-            </label>
-            {loadingCategories ? (
-              <div className="w-full rounded-lg border border-slate-300 bg-slate-50 px-3 py-2 text-sm text-slate-500">
-                Loading categories...
-              </div>
-            ) : (
-              <div className="relative category-search-container">
-                <input
-                  type="text"
-                  value={searchTerm}
-                  onChange={handleSearchChange}
-                  onFocus={() => setShowDropdown(true)}
-                  placeholder="Search for a category..."
-                  required
-                  className={`w-full rounded-lg border px-3 py-2 text-sm text-slate-900 placeholder-slate-400 transition focus:outline-none focus:ring-2 focus:ring-indigo-500/20 ${
-                    selectedCategory 
-                      ? 'border-green-300 bg-green-50 focus:border-green-500' 
-                      : 'border-slate-300 bg-white focus:border-indigo-500'
-                  }`}
-                />
-                
-                {/* Dropdown */}
-                {showDropdown && filteredCategories.length > 0 && (
-                  <div className="absolute z-10 mt-1 max-h-48 w-full overflow-auto rounded-lg border border-slate-200 bg-white shadow-lg">
-                    {filteredCategories.map((category) => (
-                      <button
-                        key={category.id}
-                        type="button"
-                        onClick={() => handleCategorySelect(category)}
-                        className="block w-full px-3 py-2 text-left text-sm text-slate-900 hover:bg-indigo-50 hover:text-indigo-900 transition"
-                      >
-                        {category.name}
-                      </button>
-                    ))}
-                  </div>
-                )}
-                
-                {/* No results message with option to create new */}
-                {showDropdown && searchTerm && filteredCategories.length === 0 && (
-                  <div className="absolute z-10 mt-1 w-full rounded-lg border border-slate-200 bg-white p-3 shadow-lg">
-                    <p className="text-sm text-slate-500 mb-2">No categories found matching "{searchTerm}"</p>
-                    <p className="text-xs text-indigo-600">✨ Press Enter or click "Add Budget" to create this as a new category</p>
-                  </div>
-                )}
-              </div>
-            )}
-          </div>
-
-          {/* Budget Amount */}
-          <div>
-            <label className="mb-1 block text-sm font-medium text-slate-700">
-              Budget Amount
-            </label>
-            <div className="relative">
-              <span className="absolute left-3 top-1/2 -translate-y-1/2 text-sm text-slate-500">
-                $
-              </span>
-              <input
-                type="number"
-                value={budget}
-                onChange={(e) => setBudget(e.target.value)}
-                placeholder="0.00"
-                step="0.01"
-                min="0"
-                required
-                className="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 pl-7 text-sm text-slate-900 placeholder-slate-400 transition focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/20"
-              />
-            </div>
-          </div>
-
-          {/* Buttons */}
-          <div className="flex gap-3">
-            <button
-              type="button"
-              onClick={onClose}
-              disabled={isSubmitting}
-              className="flex-1 rounded-lg border border-slate-300 bg-white px-4 py-2.5 text-sm font-semibold text-slate-700 shadow-sm transition hover:bg-slate-50 focus:outline-none focus:ring-2 focus:ring-slate-500 disabled:opacity-50 disabled:cursor-not-allowed"
-            >
-              Cancel
-            </button>
-            <button
-              type="submit"
-              disabled={isSubmitting || (!selectedCategory && !searchTerm.trim())}
-              className="flex-1 rounded-lg bg-indigo-600 px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed"
-            >
-              {isSubmitting ? 'Adding...' : 'Add Budget'}
-            </button>
-          </div>
-        </form>
-      </div>
-    </div>
-  );
-}
+// Removed AddBudgetModal component as it is no longer used
