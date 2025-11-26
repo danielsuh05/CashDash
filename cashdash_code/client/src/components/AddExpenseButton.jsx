@@ -220,7 +220,7 @@ export function FloatingActionButton() {
                     {showDropdown && searchTerm && filteredCategories.length === 0 && (
                       <div className="absolute z-10 mt-1 w-full rounded-lg border border-slate-200 bg-white p-3 shadow-lg">
                         <p className="text-sm text-slate-500 mb-2">No categories found matching "{searchTerm}"</p>
-                        <p className="text-xs text-indigo-600">✨ Press Enter or click "Add Expense" to create this as a new category</p>
+                        <p className="text-xs text-indigo-600">Press Enter or click "Add Expense" to create this as a new category</p>
                       </div>
                     )}
                   </div>

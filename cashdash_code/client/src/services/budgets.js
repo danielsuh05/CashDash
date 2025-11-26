@@ -2,7 +2,7 @@ import { apiCall } from '../utils/api.js'
 
 // Get all categories for autocomplete
 export async function getCategories() {
-  return await apiCall('/budgets/categories')
+  return await apiCall('/categories')
 }
 
 // Get budget data with spending information
