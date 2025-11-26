@@ -159,7 +159,7 @@ function CustomPieChart({ data }) {
   );
 }
 
-export default function PieChartCustom() {
+export default function PieChartCustom({ refreshKey = 0 }) {
   const [data, setData] = useState([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(null)
@@ -188,7 +188,7 @@ export default function PieChartCustom() {
     }
 
     fetchData()
-  }, [])
+  }, [refreshKey])
 
   return (
     <Panel title="Categories">

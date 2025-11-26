@@ -41,7 +41,7 @@ function getCurrencySymbol(currencyCode) {
   }
 }
 
-export default function ProgressList() {
+export default function ProgressList({ refreshKey = 0, onDataChanged }) {
   const { formatCurrency, currency } = useCurrency();
   const [items, setItems] = React.useState([]);
   const [loading, setLoading] = React.useState(true);
@@ -66,7 +66,7 @@ export default function ProgressList() {
 
   React.useEffect(() => {
     fetchBudgets();
-  }, [fetchBudgets]);
+  }, [fetchBudgets, refreshKey]);
 
   const handleBudgetChange = (index, value) => {
     setEditingValues(prev => ({
@@ -122,6 +122,11 @@ export default function ProgressList() {
 
       await fetchBudgets();
       setShowAddModal(false);
+      
+      // Trigger refresh of other components (budget creation may create a new category)
+      if (onDataChanged) {
+        onDataChanged();
+      }
     } catch (err) {
       console.error('Error creating budget:', err);
       alert('Failed to create budget: ' + err.message);
@@ -264,15 +269,14 @@ export default function ProgressList() {
 }
 
 function AddBudgetModal({ onClose, onAdd }) {
-  const [selectedCategory, setSelectedCategory] = React.useState(null);
+  const [categoryName, setCategoryName] = React.useState("");
   const [budget, setBudget] = React.useState("");
   const [isSubmitting, setIsSubmitting] = React.useState(false);
   const [categories, setCategories] = React.useState([]);
-  const [searchTerm, setSearchTerm] = React.useState("");
-  const [showDropdown, setShowDropdown] = React.useState(false);
   const [loadingCategories, setLoadingCategories] = React.useState(true);
+  const [error, setError] = React.useState("");
 
-  // Fetch categories on component mount
+  // Fetch categories on component mount for validation
   React.useEffect(() => {
     const fetchCategories = async () => {
       try {
@@ -289,50 +293,27 @@ function AddBudgetModal({ onClose, onAdd }) {
     fetchCategories();
   }, []);
 
-  // Close dropdown when clicking outside
-  React.useEffect(() => {
-    const handleClickOutside = (event) => {
-      if (showDropdown && !event.target.closest('.category-search-container')) {
-        setShowDropdown(false);
-      }
-    };
-
-    document.addEventListener('mousedown', handleClickOutside);
-    return () => {
-      document.removeEventListener('mousedown', handleClickOutside);
-    };
-  }, [showDropdown]);
-
-  // Filter categories based on search term
-  const filteredCategories = categories.filter(category =>
-    category.name.toLowerCase().includes(searchTerm.toLowerCase())
-  );
-
-  const handleCategorySelect = (category) => {
-    setSelectedCategory(category);
-    setSearchTerm(category.name);
-    setShowDropdown(false);
-  };
-
-  const handleSearchChange = (e) => {
-    const value = e.target.value;
-    setSearchTerm(value);
-    setShowDropdown(true);
-    
-    // Clear selected category if search doesn't exactly match selected category
-    if (selectedCategory && selectedCategory.name.toLowerCase() !== value.toLowerCase()) {
-      setSelectedCategory(null);
-    }
-  };
-
   const handleSubmit = async (e) => {
     e.preventDefault();
-    const categoryNameToUse = selectedCategory ? selectedCategory.name : searchTerm.trim();
+    setError("");
+    const trimmedCategoryName = categoryName.trim();
     
-    if (categoryNameToUse && budget && parseFloat(budget) > 0) {
+    if (trimmedCategoryName && budget && parseFloat(budget) > 0) {
+      // Check if category already exists (case-insensitive)
+      const categoryExists = categories.some(
+        cat => cat.name.toLowerCase() === trimmedCategoryName.toLowerCase()
+      );
+      
+      if (categoryExists) {
+        setError(`Category "${trimmedCategoryName}" already exists.`);
+        return;
+      }
+      
       setIsSubmitting(true);
       try {
-        await onAdd(categoryNameToUse, parseFloat(budget));
+        await onAdd(trimmedCategoryName, parseFloat(budget));
+      } catch (err) {
+        setError(err.message || 'Failed to add budget');
       } finally {
         setIsSubmitting(false);
       }
@@ -365,56 +346,26 @@ function AddBudgetModal({ onClose, onAdd }) {
         </div>
 
         <form onSubmit={handleSubmit} className="space-y-4">
-          {/* Category Search */}
-          <div className="relative">
+          {error && (
+            <div className="rounded-lg bg-red-50 p-3 text-sm text-red-600">
+              {error}
+            </div>
+          )}
+          
+          {/* Category Name */}
+          <div>
             <label className="mb-1 block text-sm font-medium text-slate-700">
               Category
             </label>
-            {loadingCategories ? (
-              <div className="w-full rounded-lg border border-slate-300 bg-slate-50 px-3 py-2 text-sm text-slate-500">
-                Loading categories...
-              </div>
-            ) : (
-              <div className="relative category-search-container">
-                <input
-                  type="text"
-                  value={searchTerm}
-                  onChange={handleSearchChange}
-                  onFocus={() => setShowDropdown(true)}
-                  placeholder="Search for a category..."
-                  required
-                  className={`w-full rounded-lg border px-3 py-2 text-sm text-slate-900 placeholder-slate-400 transition focus:outline-none focus:ring-2 focus:ring-indigo-500/20 ${
-                    selectedCategory 
-                      ? 'border-green-300 bg-green-50 focus:border-green-500' 
-                      : 'border-slate-300 bg-white focus:border-indigo-500'
-                  }`}
-                />
-                
-                {/* Dropdown */}
-                {showDropdown && filteredCategories.length > 0 && (
-                  <div className="absolute z-10 mt-1 max-h-48 w-full overflow-auto rounded-lg border border-slate-200 bg-white shadow-lg">
-                    {filteredCategories.map((category) => (
-                      <button
-                        key={category.id}
-                        type="button"
-                        onClick={() => handleCategorySelect(category)}
-                        className="block w-full px-3 py-2 text-left text-sm text-slate-900 hover:bg-indigo-50 hover:text-indigo-900 transition"
-                      >
-                        {category.name}
-                      </button>
-                    ))}
-                  </div>
-                )}
-                
-                {/* No results message with option to create new */}
-                {showDropdown && searchTerm && filteredCategories.length === 0 && (
-                  <div className="absolute z-10 mt-1 w-full rounded-lg border border-slate-200 bg-white p-3 shadow-lg">
-                    <p className="text-sm text-slate-500 mb-2">No categories found matching "{searchTerm}"</p>
-                    <p className="text-xs text-indigo-600">Press Enter or click "Add Budget" to create this as a new category</p>
-                  </div>
-                )}
-              </div>
-            )}
+            <input
+              type="text"
+              value={categoryName}
+              onChange={(e) => setCategoryName(e.target.value)}
+              placeholder="Enter category name"
+              required
+              disabled={isSubmitting}
+              className="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 placeholder-slate-400 transition focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 disabled:opacity-50"
+            />
           </div>
 
           {/* Budget Amount */}
@@ -451,7 +402,7 @@ function AddBudgetModal({ onClose, onAdd }) {
             </button>
             <button
               type="submit"
-              disabled={isSubmitting || (!selectedCategory && !searchTerm.trim())}
+              disabled={isSubmitting || !categoryName.trim() || !budget}
               className="flex-1 rounded-lg bg-indigo-600 px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed"
             >
               {isSubmitting ? 'Adding...' : 'Add Budget'}

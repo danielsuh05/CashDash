@@ -2,7 +2,7 @@
 import React from 'react';
 import { getCategories, createExpense } from '../services/expenses.js';
 
-export function FloatingActionButton() {
+export function FloatingActionButton({ onExpenseAdded }) {
     const [isOpen, setIsOpen] = React.useState(false);
     const [expenseName, setExpenseName] = React.useState("");
     const [amount, setAmount] = React.useState("");
@@ -76,12 +76,31 @@ export function FloatingActionButton() {
 
       try {
         const categoryNameToUse = selectedCategory ? selectedCategory.name : searchTerm.trim();
+        const wasNewCategory = !selectedCategory; // Track if this is a new category
+        
+        // Check if category already exists (case-insensitive)
+        if (wasNewCategory) {
+          const categoryExists = categories.some(
+            cat => cat.name.toLowerCase() === categoryNameToUse.toLowerCase()
+          );
+          
+          if (categoryExists) {
+            setError(`Category "${categoryNameToUse}" already exists. Please select it from the dropdown.`);
+            setIsLoading(false);
+            return;
+          }
+        }
         
         await createExpense({
           title: expenseName,
           amount: amount,
           categoryName: categoryNameToUse
         });
+        
+        // If a new category was created, refresh the categories list
+        if (wasNewCategory) {
+          await loadCategories();
+        }
         
         // Reset form on success
         setExpenseName("");
@@ -90,8 +109,10 @@ export function FloatingActionButton() {
         setSearchTerm("");
         setIsOpen(false);
         
-        // You might want to trigger a refresh of the dashboard here
-        // window.location.reload(); // or use a callback prop
+        // Trigger refresh of all dashboard components
+        if (onExpenseAdded) {
+          onExpenseAdded();
+        }
         
       } catch (err) {
         console.error('Failed to create expense:', err);
@@ -216,11 +237,10 @@ export function FloatingActionButton() {
                       </div>
                     )}
                     
-                    {/* No results message with option to create new */}
+                    {/* No results message */}
                     {showDropdown && searchTerm && filteredCategories.length === 0 && (
                       <div className="absolute z-10 mt-1 w-full rounded-lg border border-slate-200 bg-white p-3 shadow-lg">
-                        <p className="text-sm text-slate-500 mb-2">No categories found matching "{searchTerm}"</p>
-                        <p className="text-xs text-indigo-600">Press Enter or click "Add Expense" to create this as a new category</p>
+                        <p className="text-sm text-slate-500">No categories found matching "{searchTerm}"</p>
                       </div>
                     )}
                   </div>
