@@ -139,7 +139,7 @@ export function SpendingBarChart() {
       <ResponsiveContainer width="100%" height="100%">
         <BarChart
           data={data}
-          margin={{ top: 30, right: 100, bottom: 20, left: 10 }}
+          margin={{ top: 30, right: 100, bottom: 20, left: 25 }}
           barGap={8}
         >
           <CartesianGrid 
