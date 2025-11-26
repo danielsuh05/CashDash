@@ -64,6 +64,11 @@ export async function getRecentExpenses() {
   return apiCall('/expenses/recent')
 }
 
+//fetch monthly expenses for the past 12 months, used in bar chart
+export async function getMonthlyExpenses() {
+  return apiCall('/expenses/monthly')
+}
+
 export async function update(id, patch) {
   const idx = store.items.findIndex((x) => x.id === id)
   if (idx === -1) return null

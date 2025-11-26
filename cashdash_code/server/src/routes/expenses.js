@@ -203,3 +203,65 @@ router.get('/expenses/recent', requireAuth, async (req, res) => {
     res.status(500).json({ error: 'Internal server error' })
   }
 })
+
+//get monthly expenses for the past 12 months, used for bar chart
+//this endpoint aggregates expenses by month, returning total spending per month
+router.get('/expenses/monthly', requireAuth, async (req, res) => {
+  const user = req.user
+  
+  try {
+    //calculate date 12 months ago from now
+    const now = new Date()
+    const twelveMonthsAgo = new Date(now.getFullYear(), now.getMonth() - 11, 1)
+    
+    const { data, error } = await supabaseAdmin
+      .from('expenses')
+      .select('amount_cents, occurred_at')
+      .eq('user_id', user.id)
+      .gte('occurred_at', twelveMonthsAgo.toISOString())
+      .order('occurred_at', { ascending: true })
+
+    if (error) {
+      console.error('Database error fetching monthly expenses:', error)
+      return res.status(500).json({ error: error.message })
+    }
+
+    //group expenses by the month
+    const monthlyTotals = {}
+    
+    data.forEach(expense => {
+      const date = new Date(expense.occurred_at)
+      const monthKey = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`
+      
+      if (!monthlyTotals[monthKey]) {
+        monthlyTotals[monthKey] = {
+          month: monthKey,
+          year: date.getFullYear(),
+          monthNum: date.getMonth(),
+          total_cents: 0
+        }
+      }
+      
+      monthlyTotals[monthKey].total_cents += expense.amount_cents
+    })
+
+    //convert to array and sort by date
+    const monthlyData = Object.values(monthlyTotals).sort((a, b) => {
+      return a.year !== b.year ? a.year - b.year : a.monthNum - b.monthNum
+    })
+
+    //format month names by three letter abbreviations
+    const monthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
+    const formattedData = monthlyData.map(item => ({
+      month: monthNames[item.monthNum],
+      amount: item.total_cents / 100, //convert cents to dollars
+      year: item.year,
+      fullDate: item.month
+    }))
+
+    res.json(formattedData)
+  } catch (err) {
+    console.error('Error fetching monthly expenses:', err)
+    res.status(500).json({ error: 'Internal server error' })
+  }
+})
