@@ -29,7 +29,7 @@ export async function list() {
   return [...store.items]
 }
 
-// Fetch all available categories
+// Fetch all available categories (user-specific)
 export async function getCategories() {
   return apiCall('/categories')
 }
