@@ -4,11 +4,17 @@ import PieChartCustom from "../components/PieChartCustom.jsx";
 import ProgressList from "../components/ProgressList.jsx";
 import { useAuth } from "../contexts/AuthContext.jsx";
 import RecentPurchases from "../components/RecentPurchases.jsx";
-import { LineChart } from "../components/LineChart.jsx";
+import { SpendingBarChart } from "../components/BarChart.jsx";
 import { FloatingActionButton } from '../components/AddExpenseButton.jsx'; 
 
 export default function Dashboard() {
   const { user, signOut } = useAuth();
+  const [refreshKey, setRefreshKey] = React.useState(0);
+
+  // Function to trigger refresh of all components
+  const handleRefresh = React.useCallback(() => {
+    setRefreshKey(prev => prev + 1);
+  }, []);
 
   return (
     <div className="min-h-screen bg-slate-50">
@@ -19,22 +25,22 @@ export default function Dashboard() {
 
         <div className="mb-6">
           <Panel title="Spending Over Time">
-            <LineChart />
+            <SpendingBarChart />
           </Panel>
         </div>
 
         <div className="mb-6 grid grid-cols-1 gap-6 lg:grid-cols-2">
-          <PieChartCustom />
-          <ProgressList />
+          <PieChartCustom refreshKey={refreshKey} />
+          <ProgressList refreshKey={refreshKey} onDataChanged={handleRefresh} />
         </div>
 
         <div className="mb-6">
-          <Panel title={null} fullHeight>
-            <RecentPurchases purchases={[]} />
+          <Panel title="Recent Purchases" fullHeight>
+            <RecentPurchases purchases={[]} refreshKey={refreshKey} />
           </Panel>
         </div>
 
-        <FloatingActionButton />
+        <FloatingActionButton onExpenseAdded={handleRefresh} refreshKey={refreshKey} />
       </div>
     </div>
   );
@@ -44,8 +50,8 @@ function Panel({ title, children, fullHeight = false, action = null }) {
   return (
     <section className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm md:p-5">
       {title && (
-        <div className="mb-3 flex items-center justify-between">
-          <h3 className="text-sm font-semibold tracking-wide text-slate-700">{title}</h3>
+        <div className="mb-5 flex items-center justify-between">
+          <h3 className="text-lg font-bold text-slate-800">{title}</h3>
           {action && <div>{action}</div>}
         </div>
       )}

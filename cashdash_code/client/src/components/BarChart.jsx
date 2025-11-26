@@ -1,4 +1,4 @@
-import React, { useMemo } from "react";
+import React, { useMemo, useState, useEffect } from "react";
 import {
   ResponsiveContainer,
   BarChart,
@@ -11,25 +11,33 @@ import {
   Cell,
 } from "recharts";
 import { useCurrency } from "../contexts/CurrencyContext.jsx";
+import { getMonthlyExpenses } from "../services/expenses.js";
 
-export function LineChart() {
-  const rawData = [
-    { month: "Jan", amount: 420 },
-    { month: "Feb", amount: 435 },
-    { month: "Mar", amount: 450 },
-    { month: "Apr", amount: 390 },
-    { month: "May", amount: 470 },
-    { month: "Jun", amount: 510 },
-    { month: "Jul", amount: 480 },
-    { month: "Aug", amount: 530 },
-    { month: "Sep", amount: 460 },
-    { month: "Oct", amount: 500 },
-    { month: "Nov", amount: 540 },
-    { month: "Dec", amount: 600 },
-  ];
-
+export function SpendingBarChart() {
+  const [rawData, setRawData] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
   const budgetLimit = 500;
   const { formatCurrency } = useCurrency();
+
+  //get the monthly expense data
+  useEffect(() => {
+    const fetchMonthlyData = async () => {
+      try {
+        setLoading(true);
+        const data = await getMonthlyExpenses();
+        setRawData(data);
+        setError(null);
+      } catch (err) {
+        console.error('Error fetching monthly expenses:', err);
+        setError(err.message);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchMonthlyData();
+  }, []);
 
   //preprocess data for spending over time view
   const { data, bottomValue, topValue } = useMemo(() => {
@@ -75,6 +83,33 @@ export function LineChart() {
       </div>
     );
   };
+
+  //loading state if data is being fetched
+  if (loading) {
+    return (
+      <div className="relative h-full w-full flex items-center justify-center">
+        <div className="text-slate-500 text-sm">Loading spending data...</div>
+      </div>
+    );
+  }
+
+  //error state if there was an error fetching data
+  if (error) {
+    return (
+      <div className="relative h-full w-full flex items-center justify-center">
+        <div className="text-red-500 text-sm">Error loading data: {error}</div>
+      </div>
+    );
+  }
+
+  //empty state if no data is available
+  if (!rawData || rawData.length === 0) {
+    return (
+      <div className="relative h-full w-full flex items-center justify-center">
+        <div className="text-slate-500 text-sm">No spending data available yet</div>
+      </div>
+    );
+  }
 
   return (
     <div className="relative h-full w-full">

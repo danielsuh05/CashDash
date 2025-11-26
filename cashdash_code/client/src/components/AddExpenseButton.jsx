@@ -2,7 +2,7 @@
 import React from 'react';
 import { getCategories, createExpense } from '../services/expenses.js';
 
-export function FloatingActionButton() {
+export function FloatingActionButton({ onExpenseAdded, refreshKey = 0 }) {
     const [isOpen, setIsOpen] = React.useState(false);
     const [expenseName, setExpenseName] = React.useState("");
     const [amount, setAmount] = React.useState("");
@@ -14,10 +14,17 @@ export function FloatingActionButton() {
     const [isLoading, setIsLoading] = React.useState(false);
     const [error, setError] = React.useState("");
 
-    // Load categories when component mounts
+    // Load categories when component mounts and when refreshKey changes
     React.useEffect(() => {
         loadCategories();
-    }, []);
+    }, [refreshKey]);
+
+    // Reload categories when modal opens to ensure fresh data
+    React.useEffect(() => {
+        if (isOpen) {
+            loadCategories();
+        }
+    }, [isOpen]);
 
     // Close dropdown when clicking outside
     React.useEffect(() => {
@@ -69,6 +76,25 @@ export function FloatingActionButton() {
         }
     };
 
+    const handleCategoryKeyDown = (e) => {
+        if (e.key === 'Enter') {
+            e.preventDefault();
+            if (showDropdown && searchTerm.trim()) {
+                const existing = categories.find(c => c.name.toLowerCase() === searchTerm.trim().toLowerCase());
+                handleCategorySelect(existing || { name: searchTerm.trim() });
+            } else if (expenseName && amount && (selectedCategory || searchTerm.trim())) {
+                handleSubmit(e);
+            }
+        }
+    };
+
+    const handleFieldKeyDown = (e) => {
+        if (e.key === 'Enter') {
+            e.preventDefault();
+            handleSubmit(e);
+        }
+    };
+
     const handleSubmit = async (e) => {
       e.preventDefault();
       setIsLoading(true);
@@ -76,12 +102,31 @@ export function FloatingActionButton() {
 
       try {
         const categoryNameToUse = selectedCategory ? selectedCategory.name : searchTerm.trim();
+        const wasNewCategory = !selectedCategory; // Track if this is a new category
+        
+        // Check if category already exists (case-insensitive)
+        if (wasNewCategory) {
+          const categoryExists = categories.some(
+            cat => cat.name.toLowerCase() === categoryNameToUse.toLowerCase()
+          );
+          
+          if (categoryExists) {
+            setError(`Category "${categoryNameToUse}" already exists. Please select it from the dropdown.`);
+            setIsLoading(false);
+            return;
+          }
+        }
         
         await createExpense({
           title: expenseName,
           amount: amount,
           categoryName: categoryNameToUse
         });
+        
+        // If a new category was created, refresh the categories list
+        if (wasNewCategory) {
+          await loadCategories();
+        }
         
         // Reset form on success
         setExpenseName("");
@@ -90,8 +135,10 @@ export function FloatingActionButton() {
         setSearchTerm("");
         setIsOpen(false);
         
-        // You might want to trigger a refresh of the dashboard here
-        // window.location.reload(); // or use a callback prop
+        // Trigger refresh of all dashboard components
+        if (onExpenseAdded) {
+          onExpenseAdded();
+        }
         
       } catch (err) {
         console.error('Failed to create expense:', err);
@@ -144,8 +191,10 @@ export function FloatingActionButton() {
                   type="text"
                   value={expenseName}
                   onChange={(e) => setExpenseName(e.target.value)}
+                  onKeyDown={handleFieldKeyDown}
                   placeholder="e.g., Lunch at cafe"
                   required
+                  autoFocus
                   disabled={isLoading}
                   className="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 placeholder-slate-400 transition focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 disabled:opacity-50"
                 />
@@ -164,6 +213,7 @@ export function FloatingActionButton() {
                     type="number"
                     value={amount}
                     onChange={(e) => setAmount(e.target.value)}
+                    onKeyDown={handleFieldKeyDown}
                     placeholder="0.00"
                     step="0.01"
                     min="0"
@@ -189,19 +239,16 @@ export function FloatingActionButton() {
                       type="text"
                       value={searchTerm}
                       onChange={handleSearchChange}
+                      onKeyDown={handleCategoryKeyDown}
                       onFocus={() => setShowDropdown(true)}
                       placeholder="Search for a category..."
                       required
                       disabled={isLoading}
-                      className={`w-full rounded-lg border px-3 py-2 text-sm text-slate-900 placeholder-slate-400 transition focus:outline-none focus:ring-2 focus:ring-indigo-500/20 disabled:opacity-50 ${
-                        selectedCategory 
-                          ? 'border-green-300 bg-green-50 focus:border-green-500' 
-                          : 'border-slate-300 bg-white focus:border-indigo-500'
-                      }`}
+                      className="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 placeholder-slate-400 transition focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 disabled:opacity-50"
                     />
                     
                     {/* Dropdown */}
-                    {showDropdown && filteredCategories.length > 0 && (
+                    {showDropdown && searchTerm && (
                       <div className="absolute z-10 mt-1 max-h-48 w-full overflow-auto rounded-lg border border-slate-200 bg-white shadow-lg">
                         {filteredCategories.map((category) => (
                           <button
@@ -213,14 +260,17 @@ export function FloatingActionButton() {
                             {category.name}
                           </button>
                         ))}
-                      </div>
-                    )}
-                    
-                    {/* No results message with option to create new */}
-                    {showDropdown && searchTerm && filteredCategories.length === 0 && (
-                      <div className="absolute z-10 mt-1 w-full rounded-lg border border-slate-200 bg-white p-3 shadow-lg">
-                        <p className="text-sm text-slate-500 mb-2">No categories found matching "{searchTerm}"</p>
-                        <p className="text-xs text-indigo-600">Press Enter or click "Add Expense" to create this as a new category</p>
+                        
+                        {/* Add new category option */}
+                        {!categories.some(c => c.name.toLowerCase() === searchTerm.trim().toLowerCase()) && (
+                          <button
+                            type="button"
+                            onClick={() => handleCategorySelect({ name: searchTerm.trim() })}
+                            className="block w-full px-3 py-2 text-left text-sm text-indigo-600 hover:bg-indigo-50 transition font-medium border-t border-slate-100"
+                          >
+                            Add category: "{searchTerm}"
+                          </button>
+                        )}
                       </div>
                     )}
                   </div>
@@ -267,4 +317,5 @@ export function FloatingActionButton() {
       </div>
     );
   }
+  
   

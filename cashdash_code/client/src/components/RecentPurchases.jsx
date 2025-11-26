@@ -9,15 +9,16 @@ import './RecentPurchases.css'
  * 
  * @param {Object} props
  * @param {Array} props.purchases - Array of purchase objects with { id, name, amount, date, category }
+ * @param {number} props.refreshKey - Key that changes to trigger a refresh
  */
-export default function RecentPurchases({ purchases = [] }) {
+export default function RecentPurchases({ purchases = [], refreshKey = 0 }) {
   const { formatCurrency } = useCurrency()
   const carouselRef = useRef(null)
   const [recentExpenses, setRecentExpenses] = useState([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(null)
 
-  // Fetch recent expenses on component mount
+  // Fetch recent expenses on component mount and when refreshKey changes
   useEffect(() => {
     async function fetchRecentExpenses() {
       try {
@@ -34,7 +35,7 @@ export default function RecentPurchases({ purchases = [] }) {
     }
 
     fetchRecentExpenses()
-  }, [])
+  }, [refreshKey])
 
   // Use recentExpenses if available, fallback to purchases prop, then sample data
   const dataToUse = recentExpenses.length > 0 ? recentExpenses : purchases
@@ -115,8 +116,7 @@ export default function RecentPurchases({ purchases = [] }) {
 
   if (loading) {
     return (
-      <div className="recent-purchases-container">
-        <h2 className="recent-purchases-title">Recent Purchases</h2>
+      <div className="h-full flex items-center justify-center">
         <div className="recent-purchases-loading">Loading recent purchases...</div>
       </div>
     )
@@ -124,18 +124,15 @@ export default function RecentPurchases({ purchases = [] }) {
 
   if (error) {
     return (
-      <div className="recent-purchases-container">
-        <h2 className="recent-purchases-title">Recent Purchases</h2>
+      <div className="h-full flex items-center justify-center">
         <div className="recent-purchases-error">Error loading purchases: {error}</div>
       </div>
     )
   }
 
   return (
-    <div className="recent-purchases-container">
-      <h2 className="recent-purchases-title">Recent Purchases</h2>
-      
-      <div className="recent-purchases-carousel-wrapper">
+    <div className="h-full flex flex-col">
+      <div className="recent-purchases-carousel-wrapper flex-1">
         <button
           className={`recent-purchases-arrow recent-purchases-arrow-left ${!canScrollLeft ? 'disabled' : ''}`}
           onClick={handlePrevious}

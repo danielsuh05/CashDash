@@ -156,18 +156,22 @@ router.post('/budgets', requireAuth, async (req, res) => {
     const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1).toISOString()
     const trimmedCategoryName = categoryName.trim()
 
-    // Check if category exists for this user
-    let { data: category, error: categoryError } = await supabaseAdmin
+    // Check if category exists for this user (case-insensitive)
+    // First get all categories for the user to do case-insensitive comparison
+    const { data: allCategories, error: allCategoriesError } = await supabaseAdmin
       .from('categories')
       .select('id, name')
-      .eq('name', trimmedCategoryName)
       .eq('user_id', user.id)
-      .maybeSingle()
 
-    if (categoryError) {
-      console.error('Error checking category:', categoryError)
-      return res.status(500).json({ error: categoryError.message })
+    if (allCategoriesError) {
+      console.error('Error fetching categories:', allCategoriesError)
+      return res.status(500).json({ error: allCategoriesError.message })
     }
+
+    // Find category with case-insensitive match
+    let category = allCategories?.find(
+      cat => cat.name.toLowerCase() === trimmedCategoryName.toLowerCase()
+    )
 
     // If category doesn't exist, create it
     if (!category) {
@@ -181,6 +185,12 @@ router.post('/budgets', requireAuth, async (req, res) => {
         .single()
 
       if (createCategoryError) {
+        // Check if error is due to duplicate (database constraint)
+        if (createCategoryError.code === '23505' || createCategoryError.message.includes('duplicate')) {
+          return res.status(400).json({ 
+            error: `Category "${trimmedCategoryName}" already exists. Please use the existing category.` 
+          })
+        }
         console.error('Error creating category:', createCategoryError)
         return res.status(500).json({ error: createCategoryError.message })
       }
