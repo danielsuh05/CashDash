@@ -203,7 +203,7 @@ export default function ProgressList() {
           <p className="text-sm">Error loading budgets: {error}</p>
         </div>
       ) : (
-        <div className="h-full overflow-auto pr-1">
+        <div className="h-full overflow-auto p-1">
         {items.length === 0 && !newItem ? (
           <div className="flex h-full items-center justify-center text-slate-500">
             <p className="text-sm">No budgets found. Add a new goal to get started!</p>
@@ -220,7 +220,7 @@ export default function ProgressList() {
                     onKeyDown={handleNewItemKeyDown}
                     placeholder="Category Name"
                     autoFocus
-                    className="text-sm font-semibold text-black bg-white border border-slate-300 rounded px-2 py-1 w-full focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                    className="text-sm font-semibold text-black bg-transparent rounded px-2 py-1 w-full focus:outline-none focus:ring-2 focus:ring-slate-300"
                   />
                 </div>
                 <div className="mb-3 flex items-baseline gap-1">
@@ -241,7 +241,7 @@ export default function ProgressList() {
                         placeholder="0.00"
                         step="0.01"
                         min="0"
-                        className="text-2xl font-semibold text-slate-400 bg-white border border-slate-300 rounded px-2 py-0 pl-6 pr-2 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 w-28 leading-none [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+                        className="text-2xl font-semibold text-slate-400 bg-transparent rounded px-2 py-0 pl-6 pr-2 focus:outline-none focus:ring-2 focus:ring-slate-300 w-28 leading-none [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
                         style={{ lineHeight: '1' }}
                       />
                     </div>
