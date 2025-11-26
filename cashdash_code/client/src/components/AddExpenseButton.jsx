@@ -1,8 +1,10 @@
 
 import React from 'react';
 import { getCategories, createExpense } from '../services/expenses.js';
+import { useCurrency } from '../contexts/CurrencyContext.jsx';
 
 export function FloatingActionButton({ onExpenseAdded, refreshKey = 0 }) {
+    const { currency } = useCurrency();
     const [isOpen, setIsOpen] = React.useState(false);
     const [expenseName, setExpenseName] = React.useState("");
     const [amount, setAmount] = React.useState("");
@@ -13,6 +15,17 @@ export function FloatingActionButton({ onExpenseAdded, refreshKey = 0 }) {
     const [loadingCategories, setLoadingCategories] = React.useState(true);
     const [isLoading, setIsLoading] = React.useState(false);
     const [error, setError] = React.useState("");
+
+    const currencySymbol = React.useMemo(() => {
+        try {
+            return new Intl.NumberFormat('en-US', {
+                style: 'currency',
+                currency: currency,
+            }).formatToParts(0).find(part => part.type === 'currency').value;
+        } catch (e) {
+            return '$';
+        }
+    }, [currency]);
 
     // Load categories when component mounts and when refreshKey changes
     React.useEffect(() => {
@@ -201,7 +214,7 @@ export function FloatingActionButton({ onExpenseAdded, refreshKey = 0 }) {
                 </label>
                 <div className="relative">
                   <span className="absolute left-3 top-1/2 -translate-y-1/2 text-sm text-slate-500">
-                    $
+                    {currencySymbol}
                   </span>
                   <input
                     type="number"
