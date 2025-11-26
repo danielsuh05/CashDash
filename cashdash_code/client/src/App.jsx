@@ -1,6 +1,7 @@
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
 import { AuthProvider, useAuth } from './contexts/AuthContext.jsx'
 import { CurrencyProvider } from './contexts/CurrencyContext.jsx'
+import { BudgetProvider } from './contexts/BudgetContext.jsx'
 import AuthPage from './components/auth/AuthPage.jsx'
 import Dashboard from './dashboard/Dashboard.jsx'
 import AccountPage from './components/AccountPage.jsx'
@@ -36,9 +37,11 @@ function App() {
   return (
     <AuthProvider>
       <CurrencyProvider>
-        <BrowserRouter>
-          <AppContent />
-        </BrowserRouter>
+        <BudgetProvider>
+          <BrowserRouter>
+            <AppContent />
+          </BrowserRouter>
+        </BudgetProvider>
       </CurrencyProvider>
     </AuthProvider>
   )
