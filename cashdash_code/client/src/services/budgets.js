@@ -1,4 +1,4 @@
-wimport { apiCall } from '../utils/api.js'
+import { apiCall } from '../utils/api.js'
 
 // Get all categories for autocomplete
 export async function getCategories() {
