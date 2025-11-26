@@ -12,7 +12,7 @@ import {
 } from "recharts";
 import { useCurrency } from "../contexts/CurrencyContext.jsx";
 
-export function LineChart() {
+export function SpendingBarChart() {
   const rawData = [
     { month: "Jan", amount: 420 },
     { month: "Feb", amount: 435 },

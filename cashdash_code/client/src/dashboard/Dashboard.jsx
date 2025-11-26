@@ -4,7 +4,7 @@ import PieChartCustom from "../components/PieChartCustom.jsx";
 import ProgressList from "../components/ProgressList.jsx";
 import { useAuth } from "../contexts/AuthContext.jsx";
 import RecentPurchases from "../components/RecentPurchases.jsx";
-import { LineChart } from "../components/LineChart.jsx";
+import { SpendingBarChart } from "../components/BarChart.jsx";
 import { FloatingActionButton } from '../components/AddExpenseButton.jsx'; 
 
 export default function Dashboard() {
@@ -19,7 +19,7 @@ export default function Dashboard() {
 
         <div className="mb-6">
           <Panel title="Spending Over Time">
-            <LineChart />
+            <SpendingBarChart />
           </Panel>
         </div>
 
