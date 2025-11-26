@@ -2,7 +2,7 @@
 import React from 'react';
 import { getCategories, createExpense } from '../services/expenses.js';
 
-export function FloatingActionButton({ onExpenseAdded }) {
+export function FloatingActionButton({ onExpenseAdded, refreshKey = 0 }) {
     const [isOpen, setIsOpen] = React.useState(false);
     const [expenseName, setExpenseName] = React.useState("");
     const [amount, setAmount] = React.useState("");
@@ -14,10 +14,17 @@ export function FloatingActionButton({ onExpenseAdded }) {
     const [isLoading, setIsLoading] = React.useState(false);
     const [error, setError] = React.useState("");
 
-    // Load categories when component mounts
+    // Load categories when component mounts and when refreshKey changes
     React.useEffect(() => {
         loadCategories();
-    }, []);
+    }, [refreshKey]);
+
+    // Reload categories when modal opens to ensure fresh data
+    React.useEffect(() => {
+        if (isOpen) {
+            loadCategories();
+        }
+    }, [isOpen]);
 
     // Close dropdown when clicking outside
     React.useEffect(() => {
@@ -287,4 +294,5 @@ export function FloatingActionButton({ onExpenseAdded }) {
       </div>
     );
   }
+  
   

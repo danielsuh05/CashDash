@@ -40,7 +40,7 @@ export default function Dashboard() {
           </Panel>
         </div>
 
-        <FloatingActionButton onExpenseAdded={handleRefresh} />
+        <FloatingActionButton onExpenseAdded={handleRefresh} refreshKey={refreshKey} />
       </div>
     </div>
   );
