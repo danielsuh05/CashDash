@@ -53,17 +53,27 @@ export function SpendingBarChart() {
   }, [budgetVersion]);
 
   //preprocess data for spending over time view
+  //calculate Y-axis domain with some padding
   const { data, bottomValue, topValue } = useMemo(() => {
-    const amounts = rawData.map((d) => d.amount);
-    const maxAmount = Math.max(...amounts, budgetLimit);
-    const minAmount = Math.min(...amounts);
+    if (!rawData || rawData.length === 0) {
+      return {
+        data: [],
+        bottomValue: 0,
+        topValue: budgetLimit * 1.2 || 100
+      };
+    }
 
-    //add padding to the domain
-    const range = maxAmount - minAmount;
-    const padding = range * 0.15;
+    const amounts = rawData.map((d) => d.amount);
     
-    const top = maxAmount + padding;
-    const bottom = Math.max(0, minAmount - padding);
+    //include budget limit in the range calculation to ensure it's always visible
+    const maxValue = Math.max(...amounts, budgetLimit);
+    
+    //add padding to the domain
+    const topPadding = maxValue * 0.25;
+    const bottomPadding = maxValue * 0.1;
+    
+    const top = maxValue + topPadding;
+    const bottom = Math.max(0, -bottomPadding);
 
     const processed = rawData.map((d) => {
       return {
