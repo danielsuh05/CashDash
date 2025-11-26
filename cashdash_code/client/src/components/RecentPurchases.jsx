@@ -116,8 +116,7 @@ export default function RecentPurchases({ purchases = [], refreshKey = 0 }) {
 
   if (loading) {
     return (
-      <div className="recent-purchases-container">
-        <h2 className="recent-purchases-title">Recent Purchases</h2>
+      <div className="h-full flex items-center justify-center">
         <div className="recent-purchases-loading">Loading recent purchases...</div>
       </div>
     )
@@ -125,18 +124,15 @@ export default function RecentPurchases({ purchases = [], refreshKey = 0 }) {
 
   if (error) {
     return (
-      <div className="recent-purchases-container">
-        <h2 className="recent-purchases-title">Recent Purchases</h2>
+      <div className="h-full flex items-center justify-center">
         <div className="recent-purchases-error">Error loading purchases: {error}</div>
       </div>
     )
   }
 
   return (
-    <div className="recent-purchases-container">
-      <h2 className="recent-purchases-title">Recent Purchases</h2>
-      
-      <div className="recent-purchases-carousel-wrapper">
+    <div className="h-full flex flex-col">
+      <div className="recent-purchases-carousel-wrapper flex-1">
         <button
           className={`recent-purchases-arrow recent-purchases-arrow-left ${!canScrollLeft ? 'disabled' : ''}`}
           onClick={handlePrevious}
