@@ -9,6 +9,12 @@ import { FloatingActionButton } from '../components/AddExpenseButton.jsx';
 
 export default function Dashboard() {
   const { user, signOut } = useAuth();
+  const [refreshKey, setRefreshKey] = React.useState(0);
+
+  // Function to trigger refresh of all components
+  const handleRefresh = React.useCallback(() => {
+    setRefreshKey(prev => prev + 1);
+  }, []);
 
   return (
     <div className="min-h-screen bg-slate-50">
@@ -24,17 +30,17 @@ export default function Dashboard() {
         </div>
 
         <div className="mb-6 grid grid-cols-1 gap-6 lg:grid-cols-2">
-          <PieChartCustom />
-          <ProgressList />
+          <PieChartCustom refreshKey={refreshKey} />
+          <ProgressList refreshKey={refreshKey} onDataChanged={handleRefresh} />
         </div>
 
         <div className="mb-6">
           <Panel title={null} fullHeight>
-            <RecentPurchases purchases={[]} />
+            <RecentPurchases purchases={[]} refreshKey={refreshKey} />
           </Panel>
         </div>
 
-        <FloatingActionButton />
+        <FloatingActionButton onExpenseAdded={handleRefresh} refreshKey={refreshKey} />
       </div>
     </div>
   );

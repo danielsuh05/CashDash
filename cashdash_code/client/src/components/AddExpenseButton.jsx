@@ -2,7 +2,7 @@
 import React from 'react';
 import { getCategories, createExpense } from '../services/expenses.js';
 
-export function FloatingActionButton() {
+export function FloatingActionButton({ onExpenseAdded, refreshKey = 0 }) {
     const [isOpen, setIsOpen] = React.useState(false);
     const [expenseName, setExpenseName] = React.useState("");
     const [amount, setAmount] = React.useState("");
@@ -14,10 +14,17 @@ export function FloatingActionButton() {
     const [isLoading, setIsLoading] = React.useState(false);
     const [error, setError] = React.useState("");
 
-    // Load categories when component mounts
+    // Load categories when component mounts and when refreshKey changes
     React.useEffect(() => {
         loadCategories();
-    }, []);
+    }, [refreshKey]);
+
+    // Reload categories when modal opens to ensure fresh data
+    React.useEffect(() => {
+        if (isOpen) {
+            loadCategories();
+        }
+    }, [isOpen]);
 
     // Close dropdown when clicking outside
     React.useEffect(() => {
@@ -95,12 +102,31 @@ export function FloatingActionButton() {
 
       try {
         const categoryNameToUse = selectedCategory ? selectedCategory.name : searchTerm.trim();
+        const wasNewCategory = !selectedCategory; // Track if this is a new category
+        
+        // Check if category already exists (case-insensitive)
+        if (wasNewCategory) {
+          const categoryExists = categories.some(
+            cat => cat.name.toLowerCase() === categoryNameToUse.toLowerCase()
+          );
+          
+          if (categoryExists) {
+            setError(`Category "${categoryNameToUse}" already exists. Please select it from the dropdown.`);
+            setIsLoading(false);
+            return;
+          }
+        }
         
         await createExpense({
           title: expenseName,
           amount: amount,
           categoryName: categoryNameToUse
         });
+        
+        // If a new category was created, refresh the categories list
+        if (wasNewCategory) {
+          await loadCategories();
+        }
         
         // Reset form on success
         setExpenseName("");
@@ -109,8 +135,10 @@ export function FloatingActionButton() {
         setSearchTerm("");
         setIsOpen(false);
         
-        // You might want to trigger a refresh of the dashboard here
-        // window.location.reload(); // or use a callback prop
+        // Trigger refresh of all dashboard components
+        if (onExpenseAdded) {
+          onExpenseAdded();
+        }
         
       } catch (err) {
         console.error('Failed to create expense:', err);
@@ -235,13 +263,13 @@ export function FloatingActionButton() {
                         
                         {/* Add new category option */}
                         {!categories.some(c => c.name.toLowerCase() === searchTerm.trim().toLowerCase()) && (
-                             <button
-                                type="button"
-                                onClick={() => handleCategorySelect({ name: searchTerm.trim() })}
-                                className="block w-full px-3 py-2 text-left text-sm text-indigo-600 hover:bg-indigo-50 transition font-medium border-t border-slate-100"
-                              >
-                                Add category: "{searchTerm}"
-                              </button>
+                          <button
+                            type="button"
+                            onClick={() => handleCategorySelect({ name: searchTerm.trim() })}
+                            className="block w-full px-3 py-2 text-left text-sm text-indigo-600 hover:bg-indigo-50 transition font-medium border-t border-slate-100"
+                          >
+                            Add category: "{searchTerm}"
+                          </button>
                         )}
                       </div>
                     )}
@@ -289,4 +317,5 @@ export function FloatingActionButton() {
       </div>
     );
   }
+  
   

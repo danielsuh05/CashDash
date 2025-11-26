@@ -9,15 +9,16 @@ import './RecentPurchases.css'
  * 
  * @param {Object} props
  * @param {Array} props.purchases - Array of purchase objects with { id, name, amount, date, category }
+ * @param {number} props.refreshKey - Key that changes to trigger a refresh
  */
-export default function RecentPurchases({ purchases = [] }) {
+export default function RecentPurchases({ purchases = [], refreshKey = 0 }) {
   const { formatCurrency } = useCurrency()
   const carouselRef = useRef(null)
   const [recentExpenses, setRecentExpenses] = useState([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(null)
 
-  // Fetch recent expenses on component mount
+  // Fetch recent expenses on component mount and when refreshKey changes
   useEffect(() => {
     async function fetchRecentExpenses() {
       try {
@@ -34,7 +35,7 @@ export default function RecentPurchases({ purchases = [] }) {
     }
 
     fetchRecentExpenses()
-  }, [])
+  }, [refreshKey])
 
   // Use recentExpenses if available, fallback to purchases prop, then sample data
   const dataToUse = recentExpenses.length > 0 ? recentExpenses : purchases

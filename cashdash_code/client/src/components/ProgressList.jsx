@@ -41,7 +41,7 @@ function getCurrencySymbol(currencyCode) {
   }
 }
 
-export default function ProgressList() {
+export default function ProgressList({ refreshKey = 0, onDataChanged }) {
   const { formatCurrency, currency } = useCurrency();
   const [items, setItems] = React.useState([]);
   const [loading, setLoading] = React.useState(true);
@@ -66,7 +66,7 @@ export default function ProgressList() {
 
   React.useEffect(() => {
     fetchBudgets();
-  }, [fetchBudgets]);
+  }, [fetchBudgets, refreshKey]);
 
   const handleBudgetChange = (index, value) => {
     setEditingValues(prev => ({
@@ -130,6 +130,11 @@ export default function ProgressList() {
       await createBudget(newItem.name, budgetVal);
       await fetchBudgets();
       setNewItem(null);
+      
+      // Trigger refresh of other components (budget creation may create a new category)
+      if (onDataChanged) {
+        onDataChanged();
+      }
     } catch (err) {
       console.error('Error creating budget:', err);
       alert('Failed to create budget: ' + err.message);
