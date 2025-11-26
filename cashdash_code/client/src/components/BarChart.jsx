@@ -11,33 +11,46 @@ import {
   Cell,
 } from "recharts";
 import { useCurrency } from "../contexts/CurrencyContext.jsx";
+import { useBudget } from "../contexts/BudgetContext.jsx";
 import { getMonthlyExpenses } from "../services/expenses.js";
+import { getBudgets } from "../services/budgets.js";
 
 export function SpendingBarChart() {
   const [rawData, setRawData] = useState([]);
+  const [budgetLimit, setBudgetLimit] = useState(0);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const budgetLimit = 500;
   const { formatCurrency } = useCurrency();
+  const { budgetVersion } = useBudget();
 
-  //get the monthly expense data
+  //get the monthly expense data and budget limit
   useEffect(() => {
-    const fetchMonthlyData = async () => {
+    const fetchData = async () => {
       try {
         setLoading(true);
-        const data = await getMonthlyExpenses();
-        setRawData(data);
+        
+        //fetch both monthly expenses and budgets
+        const [expensesData, budgetsData] = await Promise.all([
+          getMonthlyExpenses(),
+          getBudgets()
+        ]);
+        
+        //calculate total budget limit by summing all category budgets
+        const totalBudget = budgetsData.reduce((sum, category) => sum + category.budget, 0);
+        
+        setRawData(expensesData);
+        setBudgetLimit(totalBudget);
         setError(null);
       } catch (err) {
-        console.error('Error fetching monthly expenses:', err);
+        console.error('Error fetching data:', err);
         setError(err.message);
       } finally {
         setLoading(false);
       }
     };
 
-    fetchMonthlyData();
-  }, []);
+    fetchData();
+  }, [budgetVersion]);
 
   //preprocess data for spending over time view
   const { data, bottomValue, topValue } = useMemo(() => {

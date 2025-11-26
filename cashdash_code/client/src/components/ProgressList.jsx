@@ -1,5 +1,6 @@
 import React from 'react';
 import { useCurrency } from '../contexts/CurrencyContext.jsx';
+import { useBudget } from '../contexts/BudgetContext.jsx';
 import { updateBudget, createBudget, getBudgets } from '../services/budgets.js';
 
 function Panel({ title, children, action = null }) {
@@ -43,6 +44,7 @@ function getCurrencySymbol(currencyCode) {
 
 export default function ProgressList({ refreshKey = 0, onDataChanged }) {
   const { formatCurrency, currency } = useCurrency();
+  const { refreshBudgets } = useBudget();
   const [items, setItems] = React.useState([]);
   const [loading, setLoading] = React.useState(true);
   const [error, setError] = React.useState(null);
@@ -88,6 +90,9 @@ export default function ProgressList({ refreshKey = 0, onDataChanged }) {
         const updated = [...items];
         updated[index].budget = newBudget;
         setItems(updated);
+        
+        //refresh budgets
+        refreshBudgets();
       } catch (error) {
         console.error('Failed to update budget:', error);
         alert('Failed to update budget: ' + error.message);
@@ -130,6 +135,9 @@ export default function ProgressList({ refreshKey = 0, onDataChanged }) {
       await createBudget(newItem.name, budgetVal);
       await fetchBudgets();
       setNewItem(null);
+      
+      //refresh budgets
+      refreshBudgets();
       
       // Trigger refresh of other components (budget creation may create a new category)
       if (onDataChanged) {
