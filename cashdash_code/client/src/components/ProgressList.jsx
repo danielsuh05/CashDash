@@ -317,12 +317,18 @@ export default function ProgressList({ refreshKey = 0, onDataChanged }) {
                     />
                   </div>
                 ) : (
-                  <span className="text-2xl font-semibold text-slate-400">{formatCurrency(item.budget)}</span>
+                  <span className="text-2xl font-semibold text-slate-400">{item.budget === 0 ? 'N/A' : formatCurrency(item.budget)}</span>
                 )}
               </div>
 
               {/* Progress bar */}
-              <div className="relative h-4 w-full overflow-hidden rounded-full bg-slate-200">
+              <div
+                className="relative h-4 w-full overflow-hidden rounded-full bg-slate-200"
+                style={item.budget === 0 ? {
+                  backgroundImage: 'linear-gradient(45deg, #94a3b8 25%, transparent 25%, transparent 50%, #94a3b8 50%, #94a3b8 75%, transparent 75%, transparent)',
+                  backgroundSize: '1rem 1rem'
+                } : {}}
+              >
                 <div
                   className="h-full transition-all"
                   style={{
