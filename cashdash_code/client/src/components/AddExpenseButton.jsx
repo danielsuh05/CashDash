@@ -102,25 +102,19 @@ export function FloatingActionButton({ onExpenseAdded, refreshKey = 0 }) {
 
       try {
         const categoryNameToUse = selectedCategory ? selectedCategory.name : searchTerm.trim();
-        const wasNewCategory = !selectedCategory; // Track if this is a new category
         
-        // Check if category already exists (case-insensitive)
-        if (wasNewCategory) {
-          const categoryExists = categories.some(
-            cat => cat.name.toLowerCase() === categoryNameToUse.toLowerCase()
-          );
-          
-          if (categoryExists) {
-            setError(`Category "${categoryNameToUse}" already exists. Please select it from the dropdown.`);
-            setIsLoading(false);
-            return;
-          }
-        }
+        // Check if category already exists (case-insensitive) and use it if it does
+        const existingCategory = categories.find(
+          cat => cat.name.toLowerCase() === categoryNameToUse.toLowerCase()
+        );
+        
+        const wasNewCategory = !existingCategory; // Track if this is truly a new category
+        const finalCategoryName = existingCategory ? existingCategory.name : categoryNameToUse;
         
         await createExpense({
           title: expenseName,
           amount: amount,
-          categoryName: categoryNameToUse
+          categoryName: finalCategoryName
         });
         
         // If a new category was created, refresh the categories list
