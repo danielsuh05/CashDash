@@ -11,46 +11,69 @@ import {
   Cell,
 } from "recharts";
 import { useCurrency } from "../contexts/CurrencyContext.jsx";
+import { useBudget } from "../contexts/BudgetContext.jsx";
 import { getMonthlyExpenses } from "../services/expenses.js";
+import { getBudgets } from "../services/budgets.js";
 
 export function SpendingBarChart() {
   const [rawData, setRawData] = useState([]);
+  const [budgetLimit, setBudgetLimit] = useState(0);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const budgetLimit = 500;
   const { formatCurrency } = useCurrency();
+  const { budgetVersion } = useBudget();
 
-  //get the monthly expense data
+  //get the monthly expense data and budget limit
   useEffect(() => {
-    const fetchMonthlyData = async () => {
+    const fetchData = async () => {
       try {
         setLoading(true);
-        const data = await getMonthlyExpenses();
-        setRawData(data);
+        
+        //fetch both monthly expenses and budgets
+        const [expensesData, budgetsData] = await Promise.all([
+          getMonthlyExpenses(),
+          getBudgets()
+        ]);
+        
+        //calculate total budget limit by summing all category budgets
+        const totalBudget = budgetsData.reduce((sum, category) => sum + category.budget, 0);
+        
+        setRawData(expensesData);
+        setBudgetLimit(totalBudget);
         setError(null);
       } catch (err) {
-        console.error('Error fetching monthly expenses:', err);
+        console.error('Error fetching data:', err);
         setError(err.message);
       } finally {
         setLoading(false);
       }
     };
 
-    fetchMonthlyData();
-  }, []);
+    fetchData();
+  }, [budgetVersion]);
 
   //preprocess data for spending over time view
+  //calculate Y-axis domain with some padding
   const { data, bottomValue, topValue } = useMemo(() => {
-    const amounts = rawData.map((d) => d.amount);
-    const maxAmount = Math.max(...amounts, budgetLimit);
-    const minAmount = Math.min(...amounts);
+    if (!rawData || rawData.length === 0) {
+      return {
+        data: [],
+        bottomValue: 0,
+        topValue: budgetLimit * 1.2 || 100
+      };
+    }
 
-    //add padding to the domain
-    const range = maxAmount - minAmount;
-    const padding = range * 0.15;
+    const amounts = rawData.map((d) => d.amount);
     
-    const top = maxAmount + padding;
-    const bottom = Math.max(0, minAmount - padding);
+    //include budget limit in the range calculation to ensure it's always visible
+    const maxValue = Math.max(...amounts, budgetLimit);
+    
+    //add padding to the domain
+    const topPadding = maxValue * 0.25;
+    const bottomPadding = maxValue * 0.1;
+    
+    const top = maxValue + topPadding;
+    const bottom = Math.max(0, -bottomPadding);
 
     const processed = rawData.map((d) => {
       return {
@@ -116,7 +139,7 @@ export function SpendingBarChart() {
       <ResponsiveContainer width="100%" height="100%">
         <BarChart
           data={data}
-          margin={{ top: 30, right: 100, bottom: 20, left: 10 }}
+          margin={{ top: 30, right: 100, bottom: 20, left: 25 }}
           barGap={8}
         >
           <CartesianGrid 
