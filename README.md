@@ -13,5 +13,5 @@ npm run start
 
 Run the following command in cashdash_code/client to start the client.
 ```
-npm run start
+npm run dev
 ```
