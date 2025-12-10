@@ -21,7 +21,7 @@ export function SpendingBarChart() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const { formatCurrency } = useCurrency();
-  const { budgetVersion } = useBudget();
+  const { budgetVersion, expenseVersion } = useBudget();
 
   //get the monthly expense data and budget limit
   useEffect(() => {
@@ -50,7 +50,7 @@ export function SpendingBarChart() {
     };
 
     fetchData();
-  }, [budgetVersion]);
+  }, [budgetVersion, expenseVersion]);
 
   //preprocess data for spending over time view
   //calculate Y-axis domain with some padding

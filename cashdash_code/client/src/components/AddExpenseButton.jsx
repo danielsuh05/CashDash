@@ -2,9 +2,11 @@
 import React from 'react';
 import { getCategories, createExpense } from '../services/expenses.js';
 import { useCurrency } from '../contexts/CurrencyContext.jsx';
+import { useBudget } from '../contexts/BudgetContext.jsx';
 
 export function FloatingActionButton({ onExpenseAdded, refreshKey = 0 }) {
     const { currency } = useCurrency();
+    const { refreshExpenses } = useBudget();
     const [isOpen, setIsOpen] = React.useState(false);
     const [expenseName, setExpenseName] = React.useState("");
     const [amount, setAmount] = React.useState("");
@@ -141,6 +143,9 @@ export function FloatingActionButton({ onExpenseAdded, refreshKey = 0 }) {
         setSelectedCategory(null);
         setSearchTerm("");
         setIsOpen(false);
+        
+        //refresh expenses in context
+        refreshExpenses();
         
         // Trigger refresh of all dashboard components
         if (onExpenseAdded) {
